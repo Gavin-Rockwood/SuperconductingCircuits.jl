@@ -41,12 +41,6 @@ function init_Circuit(components :: AbstractArray{Component}, interactions)
         for j in 1:length(components)
             op = Is[j]
             if interaction[j+1] != "1"    
-                # this is all some magic julia stuff to get the eval to work inside the function. Tis some magical shit afoot
-                #exprtoeval = Meta.parse(replace(interaction[j+1], ":" => "x.:"))
-                #@eval eval_func(x) = $exprtoeval
-                #invokelatest() do # Time travels the evaluation of the function into the future where it is defined 
-                #    op = eval_func(components[j])
-                #end
                 op = Utils.parse_and_eval(replace(interaction[j+1], ":" => "x.:"), components[j])
             end
             push!(full_op, op)
@@ -57,6 +51,7 @@ function init_Circuit(components :: AbstractArray{Component}, interactions)
         end
     end
 
+    # d for dressed, s for states, e for energy
     de_unsort, ds_unsort = qt.eigenstates(H_op)
     bare_states = Dict{Any, Any}()
     to_iter = []
@@ -71,14 +66,28 @@ function init_Circuit(components :: AbstractArray{Component}, interactions)
         bare_states[state] = qt.tensor(psis...)
     end
 
-    tracking_res = Utils.State_Tracker([ds_unsort], bare_states, other_sorts = Dict("energy" => [de_unsort]))
+    og_order = collect(0:(length(de_unsort)-1))
+    dressed_order = Vector{Union{String, Tuple}}(["missing" for i in 1:length(de_unsort)])
+    tracking_res = Utils.State_Tracker([ds_unsort], bare_states, other_sorts = Dict("energy" => [de_unsort], "order" => [og_order]))
     
     dressed_states = Dict{Any, Any}()
     dressed_energies = Dict{Any, Any}()
 
-    for state in Iterators.product(to_iter...)
-        dressed_states[state] = tracking_res[State = At(string(state)), Step = At(1)]["psi"]
-        dressed_energies[state] = tracking_res[State = At(string(state)), Step = At(1)]["energy"]
+    
+    states_iter = collect(Iterators.product(to_iter...)) 
+    for i in 1:length(states_iter)
+        dressed_energies[i] = de_unsort[i]
+        dressed_states[i] = ds_unsort[i]
+    end
+
+    for i in 1:length(states_iter)
+        state = states_iter[i]
+        # This adds 2 keys for dress_state, one with the bare index, and one with indexing its position in the dressed energy spectrum. 
+        # It is done in a way such that both entries point to the same object to save memory. 
+        og_pos = tracking_res[State = At(string(state)), Step = At(1)]["order"]
+        dressed_states[state] = dressed_states[og_pos+1]
+        dressed_energies[state] = dressed_energies[og_pos+1]
+        dressed_order[og_pos+1] = state
     end
 
 
@@ -97,7 +106,7 @@ function init_Circuit(components :: AbstractArray{Component}, interactions)
         comp_dict[components[i].params[:name]] = components[i]
     end
 
-    return Circuit(H_op = H_op, dressed_energies = dressed_energies, dressed_states = dressed_states, dims = dims, order = order, loss_ops = loss_ops, components = comp_dict, interactions = interactions, stuff = Dict{Any, Any}(), static_gates = Dict{Any, Any}(), dynamic_gates = Dict{Any, Any}(), ops = Dict{Any, Any}())
+    return Circuit(H_op = H_op, dressed_energies = dressed_energies, dressed_states = dressed_states, dims = dims, order = order, loss_ops = loss_ops, components = comp_dict, interactions = interactions, stuff = Dict{Any, Any}(), static_gates = Dict{Any, Any}(), dynamic_gates = Dict{Any, Any}(), ops = Dict{Any, Any}(), dressed_order = dressed_order)
 end
 
 """

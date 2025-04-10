@@ -1,4 +1,11 @@
 import DifferentialEquations as DE
+
+@kwdef struct Propagator
+    H :: Union{qt.QobjEvo, qt.QuantumObject}
+    eval :: Function
+end
+
+
 function propagator(H::Union{qt.QobjEvo, qt.QuantumObject}, tf; ti = 0, solver = DE.Vern9(), solver_kwargs = Dict{Any, Any}())
     H = qt.QobjEvo(H)
 
@@ -17,4 +24,8 @@ function propagator(H::Union{qt.QobjEvo, qt.QuantumObject}, tf; ti = 0, solver =
     sol = DE.solve(prob, solver; solver_kwargs...)
     
     return qt.Qobj(sol.u[end], dims = H.dims)
+end
+
+function get_propagator(H :: Union{qt.QobjEvo, qt.QuantumObject})
+    return Propagator(H, (tf, ti=0, solver_kwargs=Dict{Symbol, Any}())-> propagator(H, tf; ti=ti, solver_kwargs...))
 end

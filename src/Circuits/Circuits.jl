@@ -34,6 +34,7 @@ module Circuits
         static_gates :: Dict
         dynamic_gates :: Dict
         ops :: Dict
+        dressed_order :: Vector
     end
     include("CircuitConstructor.jl")
 
