@@ -1,16 +1,16 @@
-function Square_Envelope(t, drive_time)
+function square_envelope(t, drive_time)
     return 1.0
 end
-Envelope_Dict["Square"] = Square_Envelope
+envelope_dict["square"] = square_envelope
 
 
 
-function Square_Envelope_Cal(x...)
+function square_envelope_cal(x...)
     drive_time = x[1]
-    Envelope_Args = x[2]
-    return Envelope_Args
+    envelope_Args = x[2]
+    return envelope_Args
 end
-Envelope_Dict_Cal["Square"] = Square_Envelope_Cal
+envelope_dict_cal["square"] = square_envelope_cal
 
 
 

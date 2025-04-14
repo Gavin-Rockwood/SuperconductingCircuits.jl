@@ -14,7 +14,7 @@ export Resonator, init
 
 end
 
-function init_Resonator(Eosc, N; name = "Resonator", kappa_c = 1/(1000*1000), kappa_d =  0)
+function init_resonator(Eosc, N; name = "Resonator", kappa_c = 1/(1000*1000), kappa_d =  0)
 
     a_op = qt.destroy(N)
     N_op = a_op'*a_op
@@ -43,11 +43,11 @@ function init_Resonator(Eosc, N; name = "Resonator", kappa_c = 1/(1000*1000), ka
     return Resonator(params = params, dim = N, H_op = H_op, N_op = N_op, eigenenergies = eigenenergies, eigenstates=eigenstates, a_op = a_op, loss_ops = loss_ops)
 end
 
-function init_Resonator(Params::T) where T<:Dict
+function init_resonator(Params::T) where T<:Dict
     params = deepcopy(Params)
     Eosc = params[:Eosc]
     delete!(params, :Eosc)
     N = params[:N]
     delete!(params, :N)
-    init_Resonator(Eosc, N; params...)
+    init_resonator(Eosc, N; params...)
 end

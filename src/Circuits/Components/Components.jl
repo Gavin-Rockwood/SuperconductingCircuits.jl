@@ -9,12 +9,12 @@ abstract type Component end
 # -a dictionary "params" which contains all the parameters that go into the init function where they keys are symbols
 Component_Required_Objects = [:H_op, :params, :eigenstates, :eigenenergies, :dim, :loss_ops]
 
-init_Components = Dict{Any, Any}() # The keys here need to be same names as the struct names
+init_components = Dict{Any, Any}() # The keys here need to be same names as the struct names
 include("Resonator.jl")
-init_Components["Resonator"] = init_Resonator
+init_components["resonator"] = init_resonator
 include("SNAIL.jl")
-init_Components["SNAIL"] = init_SNAIL
+init_components["snail"] = init_snail
 include("Transmons.jl")
-init_Components["Transmon"] = init_Transmon
-include("Qubit.jl")
-init_Components["Qubit"] = init_Qubit
+init_components["transmon"] = init_transmon
+include("qubit.jl")
+init_components["qubit"] = init_qubit

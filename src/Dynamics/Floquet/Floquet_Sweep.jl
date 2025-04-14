@@ -1,5 +1,5 @@
 
-function Floquet_Sweep(H_func,
+function floquet_sweep(H_func,
     sampling_points,
     T;
     sampling_times = [],
@@ -52,7 +52,7 @@ function Floquet_Sweep(H_func,
     if length(states_to_track) > 0
         if (use_logging) @info "Tracking State" end
         other_sorts = Dict("Quasienergies" => F_Energies)
-        tracking_res = Utils.State_Tracker(F_Modes, states_to_track, other_sorts = other_sorts, use_logging = use_logging)
+        tracking_res = Utils.state_tracker(F_Modes, states_to_track, other_sorts = other_sorts, use_logging = use_logging)
         res["Tracking"] = tracking_res
     end
     return res

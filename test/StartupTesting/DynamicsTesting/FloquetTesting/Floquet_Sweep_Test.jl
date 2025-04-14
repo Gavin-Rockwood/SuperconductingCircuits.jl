@@ -20,7 +20,7 @@
     As = collect(range(0.0, 10.0, length = 100))#.*omega
     Ts = 2*pi./omega
 
-    sweep_res = SCC.Dynamics.Floquet_Sweep(H_func, As, Ts, states_to_track = states_to_track)
+    sweep_res = SCC.Dynamics.floquet_sweep(H_func, As, Ts, states_to_track = states_to_track)
     @test true
     
     vals = []

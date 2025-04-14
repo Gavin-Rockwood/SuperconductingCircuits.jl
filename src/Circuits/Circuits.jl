@@ -27,16 +27,19 @@ module Circuits
         dressed_states :: Dict
         dims :: Tuple
         order :: Vector
-        loss_ops :: Dict
-        components :: Dict
+        loss_ops :: Dict{String, qt.QuantumObject}
+        components :: Dict{String, Any}
         interactions :: Vector
-        stuff :: Dict
-        static_gates :: Dict
-        dynamic_gates :: Dict
-        ops :: Dict
+        stuff :: Dict{String, Any}
+        drives :: Dict{String, Any}
+        gates :: Dict{String, Any}
+        ops :: Dict{String, Any}
+        io_stuff :: Dict{String, Any}
         dressed_order :: Vector
     end
     include("CircuitConstructor.jl")
+    include("CircuitUtils.jl")
+    include("CircuitOverloads.jl")
 
 
 end

@@ -6,7 +6,7 @@
     ng = 0.0
     N = 5
     name = "TestTransmon"
-    transmon = SCC.Circuits.init_Transmon(EC, EJ, N_full, N, name=name, ng = ng)
+    transmon = SCC.Circuits.init_transmon(EC, EJ, N_full, N, name=name, ng = ng)
     for req in SCC.Circuits.Component_Required_Objects
         @test hasfield(typeof(transmon), req)
     end

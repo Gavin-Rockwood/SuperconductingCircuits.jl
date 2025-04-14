@@ -13,7 +13,7 @@
 
 end
 
-function init_Transmon(EC, EJ, N_full, N; name = "Transmon",  ng = 0, kappa_c = 1/(56*1000), kappa_d = 1.2348024316109425e-5)
+function init_transmon(EC, EJ, N_full, N; name = "Transmon",  ng = 0, kappa_c = 1/(56*1000), kappa_d = 1.2348024316109425e-5)
     dim_full = 2*N_full+1
     I_op_full = qt.eye(dim_full)
     
@@ -76,7 +76,7 @@ function init_Transmon(EC, EJ, N_full, N; name = "Transmon",  ng = 0, kappa_c = 
     return Transmon(params = params, dim = N, H_op_full = H_op_full, H_op = H_op, n_op_full = n_op_full, n_op = n_op, eigenenergies = eigenenergies, eigenstates=eigenstates, loss_ops = loss_ops)
 end
 
-function init_Transmon(Params::T) where T<:Dict
+function init_transmon(Params::T) where T<:Dict
     params = deepcopy(Params)
     EC = params[:EC]
     delete!(params, :EC)
@@ -86,5 +86,5 @@ function init_Transmon(Params::T) where T<:Dict
     delete!(params, :N_full)
     N = params[:N]
     delete!(params, :N)
-    init_Transmon(EC, EJ, N_full, N; params...)
+    init_transmon(EC, EJ, N_full, N; params...)
 end

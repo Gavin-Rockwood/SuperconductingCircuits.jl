@@ -1,4 +1,4 @@
-function Bump_Envelope(t, drive_time; k = 2, center = "None")
+function bump_envelope(t, drive_time; k = 2, center = "None")
     if center == "None"
         center = drive_time/2
     end
@@ -14,9 +14,9 @@ function Bump_Envelope(t, drive_time; k = 2, center = "None")
     end
     
 end
-Envelope_Dict["Bump"] = Bump_Envelope
+envelope_dict["bump"] = bump_envelope
 
-function Bump_Envelope_Cal(x...)
+function bump_envelope_cal(x...)
     drive_time = x[1]
     Envelope_Args = x[2]
     if !("k" in keys(Envelope_Args))
@@ -26,4 +26,4 @@ function Bump_Envelope_Cal(x...)
 
     return Envelope_Args
 end
-Envelope_Dict_Cal["Bump"] = Bump_Envelope_Cal
+envelope_dict_cal["Bump"] = bump_envelope_cal

@@ -1,24 +1,39 @@
-function Get_Drive_Coefficient(amplitude, frequency, phase, envelope; return_complex = false)
-    eps_t(t) = amplitude*envelope(t)
-    # the params and kwargs are needed for the form required to get the QobjEvo 
-    drive_coef(p, t) = eps_t(t)*sin(2*pi*frequency*t+phase)
-    drive_coef_C(p, t) = eps_t(t)*exp(-2im*pi*frequency*t+phase)
-
-    if return_complex
-        return drive_coef_C
-    else
-        return drive_coef
+function get_drive_coef(drive_param :: StaticDriveCoefParam)
+    envelope = Envelopes.get_envelope(drive_param.drive_time, drive_param.envelope, drive_param.envelope_params)
+    function coef(p,t)
+        if t < drive_param.delay
+            return 0.0
+        elseif t > drive_param.drive_time + drive_param.delay
+            return 0.0
+        else
+            tt = t - drive_param.delay
+            return drive_param.amplitude * envelope(t) * sin(2 * pi * drive_param.frequency * t + drive_param.phase)
+        end
     end
+    return coef
 end
 
-
-
-function Get_Drive_Coefficient(drive::StaticDrive; kwargs...)
-    digitize = false
-    if "digitize" in drive.notes
-        digitize = drive.notes["digitize"]
+function get_drive(drive_params :: AbstractArray{GeneralDriveParam}; drive_names = [])
+    drive_pairs = []
+    times = []
+    param_dict = Dict{String, DriveCoefParam}()
+    for i in 1:length(drive_params)
+        param = drive_params[i].coef_param
+        push!(drive_pairs, (drive_params[i].op, get_drive_coef(param)))
+        push!(times, param.drive_time+param.delay)
+        if i <= length(drive_names)
+            param_dict[drive_names[i]] = param
+        else
+            param_dict["drive_$(i)"] = param
+        end
     end
-    envelope = Envelopes.Get_Envelope(drive.drive_time, drive.envelope, drive.envelope_params; digitize = digitize)
+
+    drive = qt.QobjEvo(tuple(drive_pairs...))
+    drive_time = maximum(times)
     
-    Get_Drive_Coefficient(drive.amplitude, drive.frequency, drive.phase, envelope; kwargs...)
+    return Drive(drive_params = drive_params, notes = Dict{Any, Any}(), drive = drive, drive_time = drive_time) 
+end
+
+function get_drive(drive_param :: GeneralDriveParam)
+    get_drive([drive_param])
 end

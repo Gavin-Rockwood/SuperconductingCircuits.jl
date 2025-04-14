@@ -9,7 +9,7 @@ module SuperconductingCircuits
 
     include("Dynamics/Dynamics.jl")
     import .Dynamics
-
+    
     include("Circuits/Circuits.jl")
     import .Circuits
 

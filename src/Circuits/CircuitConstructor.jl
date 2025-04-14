@@ -10,7 +10,7 @@
     hermitian conjugate added, then there can be an extra entree at the end that is "hc".
 """
 
-function init_Circuit(components :: AbstractArray{Component}, interactions)
+function init_circuit(components :: AbstractArray{Component}, interactions; operators_to_add = Dict{String, Any}())
     dims = []
     Is = []
     order = []
@@ -68,7 +68,7 @@ function init_Circuit(components :: AbstractArray{Component}, interactions)
 
     og_order = collect(0:(length(de_unsort)-1))
     dressed_order = Vector{Union{String, Tuple}}(["missing" for i in 1:length(de_unsort)])
-    tracking_res = Utils.State_Tracker([ds_unsort], bare_states, other_sorts = Dict("energy" => [de_unsort], "order" => [og_order]))
+    tracking_res = Utils.state_tracker([ds_unsort], bare_states, other_sorts = Dict("energy" => [de_unsort], "order" => [og_order]))
     
     dressed_states = Dict{Any, Any}()
     dressed_energies = Dict{Any, Any}()
@@ -106,17 +106,36 @@ function init_Circuit(components :: AbstractArray{Component}, interactions)
         comp_dict[components[i].params[:name]] = components[i]
     end
 
-    return Circuit(H_op = H_op, dressed_energies = dressed_energies, dressed_states = dressed_states, dims = dims, order = order, loss_ops = loss_ops, components = comp_dict, interactions = interactions, stuff = Dict{Any, Any}(), static_gates = Dict{Any, Any}(), dynamic_gates = Dict{Any, Any}(), ops = Dict{Any, Any}(), dressed_order = dressed_order)
+    circuit = Circuit(H_op = H_op,
+            dressed_energies = dressed_energies,
+            dressed_states = dressed_states,
+            dims = dims,
+            order = order,
+            loss_ops = loss_ops,
+            components = comp_dict,
+            interactions = interactions, 
+            stuff = Dict{Any, Any}(),
+            drives = Dict{Any, Any}(),
+            gates = Dict{Any, Any}(),
+            ops = Dict{Any, Any}(),
+            io_stuff = Dict{Any, Any}(),
+            dressed_order = dressed_order)
+    
+    for operator in keys(operators_to_add)
+        add_operator!(circuit, operators_to_add[operator], operator)
+    end
+
+    return circuit
 end
 
 """
     This one takes in a list of component parameter dictionaries 
     instead of components. 
 """
-function init_Circuit(components :: AbstractArray{Dict}, types, interactions)
+function init_circuit(components :: AbstractArray{Dict}, types, interactions; kwargs...)
     component_list = []
     for i in 1:length(components)
         push!(component_list, Component_inits[types[i]](component))
     end
-    init_Circuit(component_list, interactions)
+    init_circuit(component_list, interactions; kwargs...)
 end

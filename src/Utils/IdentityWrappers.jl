@@ -1,4 +1,4 @@
-function IdentityWrapper(𝕀̂_Dict::Dict, Operator_Dict; order = [])
+function identity_wrapper(𝕀̂_Dict::Dict, Operator_Dict; order = [])
     if length(order) == length(𝕀̂_Dict)
         key_list = order
     else

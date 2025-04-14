@@ -77,7 +77,7 @@ module SNAIL_TOOLS
     end
 end
 
-function init_SNAIL(EC, EJ, EL, alpha, Phi_e,  dim_full, N; name = "SNAIL", N_Junc = 3)
+function init_snail(EC, EJ, EL, alpha, Phi_e,  dim_full, N; name = "SNAIL", N_Junc = 3)
     cs = SNAIL_TOOLS.get_c_coeffs_dressed(N_Junc, alpha, Phi_e, EJ, EL)
     @debug "dressed cs: $cs"
     
@@ -150,7 +150,7 @@ function init_SNAIL(EC, EJ, EL, alpha, Phi_e,  dim_full, N; name = "SNAIL", N_Ju
 
 end
 
-function init_SNAIL(Params::T) where T<:Dict
+function init_snail(Params::T) where T<:Dict
     params = deepcopy(Params)
     EC = params[:EC]
     delete!(params, :EC)
@@ -166,5 +166,5 @@ function init_SNAIL(Params::T) where T<:Dict
     delete!(params, :dim_full)
     N = params[:N]
     delete!(params, :N)
-    init_SNAIL(EC, EJ, EL, alpha, Phi_e, dim_full, N; params...)
+    init_snail(EC, EJ, EL, alpha, Phi_e, dim_full, N; params...)
 end

@@ -8,7 +8,7 @@
     dim_full = 120
     N = 6
 
-    snail = SCC.Circuits.init_SNAIL(EC, EJ, EL, alpha, Phi_e, dim_full, N, name="TestSNAIL")
+    snail = SCC.Circuits.init_snail(EC, EJ, EL, alpha, Phi_e, dim_full, N, name="TestSNAIL")
     for req in SCC.Circuits.Component_Required_Objects
         @test hasfield(typeof(snail), req)
     end

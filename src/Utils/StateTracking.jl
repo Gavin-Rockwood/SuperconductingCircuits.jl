@@ -1,4 +1,4 @@
-function State_Tracker(state_history::Vector, states_to_track::Dict; other_sorts = Dict{Any, Any}(), use_logging = true)
+function state_tracker(state_history::Vector, states_to_track::Dict; other_sorts = Dict{Any, Any}(), use_logging = true)
     STEPS = length(state_history)
     NUM_IN_STEP = length(state_history[1])
     NUM_TO_TRACK = length(states_to_track)
