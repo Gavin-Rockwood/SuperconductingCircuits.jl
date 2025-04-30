@@ -10,7 +10,7 @@
     hermitian conjugate added, then there can be an extra entree at the end that is "hc".
 """
 
-function init_circuit(components :: AbstractArray{Component}, interactions; operators_to_add = Dict{String, Any}())
+function init_circuit(components :: AbstractArray{Component}, interactions; operators_to_add = Dict{String, Any}(), use_sparse = true)
     dims = []
     Is = []
     order = []
@@ -24,7 +24,7 @@ function init_circuit(components :: AbstractArray{Component}, interactions; oper
     dims = tuple(dims...)
 
     I = qt.eye(prod(dims), dims = dims)
-    H_op = 0*I
+    H_op_0 = 0*I
 
     for i in 1:length(components)
         op = []
@@ -32,9 +32,10 @@ function init_circuit(components :: AbstractArray{Component}, interactions; oper
             push!(op, Is[j])
         end
         op[i] = components[i].H_op
-        H_op += qt.tensor(op...)
+        H_op_0 += qt.tensor(op...)
     end
 
+    H_op = H_op_0
     for interaction in interactions
         g = interaction[1]
         full_op = []
@@ -51,8 +52,12 @@ function init_circuit(components :: AbstractArray{Component}, interactions; oper
         end
     end
 
+    if use_sparse
+        H_op = qt.sparse(H_op)
+    end
     # d for dressed, s for states, e for energy
     de_unsort, ds_unsort = qt.eigenstates(H_op)
+    de_unsort = real.(de_unsort)
     bare_states = Dict{Any, Any}()
     to_iter = []
     for i in 1:length(dims)
@@ -122,7 +127,7 @@ function init_circuit(components :: AbstractArray{Component}, interactions; oper
             dressed_order = dressed_order)
     
     for operator in keys(operators_to_add)
-        add_operator!(circuit, operators_to_add[operator], operator)
+        add_operator!(circuit, operators_to_add[operator], operator; use_sparse = use_sparse)
     end
 
     return circuit
