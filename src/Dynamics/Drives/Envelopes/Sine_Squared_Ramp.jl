@@ -12,10 +12,10 @@ end
 envelope_dict["sine_squared_ramp"] = sine_squared_ramp_envelope
 
 
-function sine_squared_ramp_envelope_cal(x...)
-    t = x[1]
-    envelope_Args = x[2]
-    envelope_Args["pulse_time"] = t
-    return envelope_Args
-end
-envelope_dict_cal["sine_squared_ramp"] = sine_squared_ramp_envelope_cal
+# function sine_squared_ramp_envelope_cal(x...)
+#     t = x[1]
+#     envelope_Args = x[2]
+#     envelope_Args["pulse_time"] = t
+#     return envelope_Args
+# end
+# envelope_dict_cal["sine_squared_ramp"] = sine_squared_ramp_envelope_cal

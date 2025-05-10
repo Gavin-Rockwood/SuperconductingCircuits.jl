@@ -14,9 +14,9 @@ function gaussian_ramp_envelope(t, drive_time; ramp_time = 10, sigma_factor = 4)
 end
 envelope_dict["gaussian_ramp"] = gaussian_ramp_envelope
 
-function gaussian_ramp_envelope_cal(x...)
-    t = x[1]
-    envelope_Args = x[2]
-    return envelope_Args
-end
-envelope_dict_cal["gaussian_ramp"] = gaussian_ramp_envelope_cal
+# function gaussian_ramp_envelope_cal(x...)
+#     t = x[1]
+#     envelope_Args = x[2]
+#     return envelope_Args
+# end
+# envelope_dict_cal["gaussian_ramp"] = gaussian_ramp_envelope_cal

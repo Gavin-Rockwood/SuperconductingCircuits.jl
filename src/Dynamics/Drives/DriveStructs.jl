@@ -15,7 +15,7 @@ export Gate
     # Need to add the dynamic drives as well as digital drives 
 # this is used if the drive is defined with respect ot a circuit. The string for op should correspond to a key in Circuit.ops
 
-@kwdef struct StaticDriveCoefParam <: DriveCoefParam
+@kwdef mutable struct StaticDriveCoefParam <: DriveCoefParam
     envelope :: String
     envelope_params :: Dict{Symbol, Any}
     frequency :: Number
@@ -24,8 +24,8 @@ export Gate
     drive_time :: Number
     delay :: Number = 0.0
 end 
-
-@kwdef struct DynamicDriveCoefParam <: DriveCoefParam
+    
+@kwdef mutable struct DynamicDriveCoefParam <: DriveCoefParam
     envelope :: String
     envelope_params :: Dict{Symbol, Any}
     frequency :: Function
@@ -51,6 +51,7 @@ end
     notes :: Dict{Any, Any}
     drive :: qt.QuantumObjectEvolution # this is the time dependent operator of the drive
     drive_time :: Number # this is the total amount of time the drives will be on for, it includes any delays.
+    includes_H :: Bool
 end
 
 @kwdef struct Gate

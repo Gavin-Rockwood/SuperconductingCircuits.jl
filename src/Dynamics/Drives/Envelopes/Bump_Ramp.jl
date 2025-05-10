@@ -29,21 +29,21 @@ function bump_ramp_envelope(t, drive_time; ramp_time = 1, k = 2)
     elseif (t<=(drive_time-ramp_time)) && (t>=ramp_time)
         return 1
     elseif t>(drive_time-ramp_time)
-        return bump_envelope(t, 2*ramp_time, k = k, center = drive_time-ramp_time)
+        return bump_envelope(t, 2*ramp_time, k = k, mu = drive_time-ramp_time)
     end
 end
 envelope_dict["bump_ramp"] = bump_ramp_envelope
 
-function bump_ramp_envelope_cal(x...)
-    drive_time = x[1]
-    Envelope_Args = x[2]
+# function bump_ramp_envelope_cal(x...)
+#     drive_time = x[1]
+#     Envelope_Args = x[2]
 
-    if !("k" in keys(Envelope_Args))
-        Envelope_Args["k"] = 2
-        @warn "k not specified, using default value of 2"
-    end
+#     if !("k" in keys(Envelope_Args))
+#         Envelope_Args["k"] = 2
+#         @warn "k not specified, using default value of 2"
+#     end
     
-    return Envelope_Args
-end
+#     return Envelope_Args
+# end
 
-envelope_dict_cal["bump_ramp"] = bump_ramp_envelope_cal
+# envelope_dict_cal["bump_ramp"] = bump_ramp_envelope_cal

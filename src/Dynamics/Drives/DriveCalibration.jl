@@ -1,105 +1,68 @@
+function calibrate_drive_time!(drive_coef_param :: StaticDriveCoefParam, H_op :: qt.QuantumObject, drive_op :: qt.QuantumObject, t_range, psi0, to_min::Function; samples_per_level = 5, maxiter = 5, tol = 1e-3, solver_kwargs = Dict{Symbol, Any}())
+    best_time = 0.0
+    for i in 1:maxiter
+        sample_mins = []
+        times = collect(LinRange(t_range[1], t_range[end], samples_per_level))
+        @info "Times: $times"
+        for j in 1:samples_per_level
+            drive_coef_param.drive_time = times[j]
+            drive_param = GeneralDriveParam(op = drive_op, coef_param = drive_coef_param)
+            drive = Dynamics.get_drive(drive_param)
 
-# function findstarkshift(H_op,
-#     H_D_op,
-#     psi1,
-#     psi2,
-#     base_frequency,
-#     amplitude,
-#     starkshifts;
-#     make_plot = true,
-#     state_names = ["1", "2"], 
-#     Floquet_t0_Sweep_kwargs = Dict{Any, Any}())
+            dt = abs(1/drive_param.coef_param.frequency)
+            evo_res = qt.sesolve(2*pi*(H_op+drive.drive), psi0, 0:dt:times[j], alg = DE.Vern9(), solver_kwargs...)
+            push!(sample_mins, to_min(evo_res.states[end]))
+        end
+        @info "Iter $i mins: $sample_mins"
+        j_best = argmin(sample_mins)
+        if j_best == 1
+            t_range[1] = times[1]
+        elseif j_best > 1
+            t_range[1] = times[j_best-1]
+        end
+        
+        if j_best == samples_per_level
+            t_range[end] = times[samples_per_level]
+        elseif j_best < samples_per_level
+            t_range[end] = times[j_best+1]
+        end
+        best_time = times[j_best]
+        if sample_mins[j_best] < tol
+            @info "Minimum Beats Tolerance: $sample_mins[j_best]"
+            @info "Best Time: $(times[j_best])"
+            @info "Returning This Time"
+            drive_coef_param.drive_time = best_time
+            return nothing
+        end
+    end
+    @info "Never Beat the Tolerance"
+    @info "Returning the Best Time"
+    drive_coef_param.drive_time = best_time
+    return nothing
+end
 
-#     frequencies = base_frequency .+ starkshifts
-    
-#     envelope(t) = 1.0
-#     function H_func(frequency)
-#         drive_coef = get_drive_coefficient(amplitude, frequency, 0.0, envelope)
-#         return qt.QObjEvo(H_op, (H_D_op, drive_coef))
-#     end
-#     Ts = 1.0 ./ frequencies
-#     states_to_track = Dict{Any, Any}(state_names[1] => psi1, state_names[2] => psi2)
-#     Floquet_t0_Sweep_kwargs["states_to_track"] = states_to_track
-
-#     Floq_Sweep_Res = Floquet_t0_Sweep(H_func, frequencies, Ts; Floquet_t0_Sweep_kwargs...)
-
-#     ys = []
-#     for state in ["1", "2"]
-#         ys_temp = []
-#         for i in 1:length(frequencies)
-#             val = Floq_Sweep_Res["Tracking"][State = At(string(state)), Step = At(i)]["Quasienergies"]/pi
-#             if val < 0
-#                 val += 2*abs(frequencies[i])
-#             end
-#             push!(ys_temp, val)
-#         end
-#         push!(ys, ys_temp)
-#     end
-
-#     x = starkshifts
-#     difs1 = abs.(ys[1] .- ys[2])
-#     difs2 = 2*abs.(frequencies) .- abs.(ys[1] .- ys[2])
-
-#     difs = []
-#     for i in 1:length(difs1)
-#         push!(difs, min(difs1[i], difs2[i]))
-#     end
-
-#     to_fit(t,p) = p[3]*sqrt.((t.-p[1]).^2 .+ p[2].^2)
-#     p0 = zeros(3)
-#     p0[1] = x[argmin(difs)]
-#     p0[2] = minimum(difs)
-#     p0[3] = abs((maximum(difs)-minimum(difs))/(x[argmax(difs)]-x[argmin(difs)]))
-#     fit = LF.curve_fit(to_fit, x, difs, p0)
-
-#     @info "Fit Stuff: "*Utils.tostr(fit.param)
-
-#     to_return = Dict{Any, Any}("Stark Shift" => fit.param[1], "Approximate Drive Time" => 1/(fit.param[2]*fit.param[3]), "ys" => ys, "difs" => difs, "fit" => fit)
-
-#     if make_plot 
-#         f = cm.Figure(size = (800, 500), px_per_unit = 3)
-
-#         ax1 = cm.Axis(f[1,1], title = "Floquet Energies", xlabel = "Stark Shifts", ylabel = "Quasienergies (GHz)")
-#         ax2 = cm.Axis(f[2,1], title = "Difference", xlabel = "Stark Shifts", ylabel = "Dif (GHz)")
+function calibrate_drive_time!(drive_param :: GeneralDriveParam, H_op :: qt.QuantumObject, t_range, psi0, to_min::Function; kwargs...)
+    calibrate_drive_time!(drive_param.coef_param, H_op, drive_param.op, t_range, psi0, to_min; kwargs...)
+end
 
 
-#         x = Real.(collect(νs.-ν))
-#         y = []
+function calibrate_drive_time(drive_coef_param :: StaticDriveCoefParam, H_op :: qt.QuantumObject, drive_op :: qt.QuantumObject, t_range, psi0, to_min::Function; samples_per_level = 5, maxiter = 5, tol = 1e-3, solver_kwargs = Dict{Symbol, Any}(), return_drive = true, include_H = true)
+    drive_coef_param = deepcopy(drive_coef_param)
+    calibrate_drive_time!(drive_coef_param, H_op, drive_op, t_range, psi0, to_min; samples_per_level = samples_per_level, maxiter = maxiter, tol = tol, solver_kwargs = solver_kwargs)
+    if return_drive
+        drive_param = GeneralDriveParam(op = drive_op, coef_param = drive_coef_param) 
+        if include_H
+            drive = Dynamics.get_drive(drive_param, H_op = H_op)
+        else
+            drive = Dynamics.get_drive(drive_param)
+        end
+        return drive
+    else
+        return drive_coef_param
+    end
+end
 
-#         colorlist = [:forestgreen, :coral]
-#         markers = ['+', '×']
-
-#         for i in 1:length(dims(tracking_res, :State))
-#             state = dims(tracking_res, :State)[i]
-#             cm.scatterlines!(ax1, x, ys[i], label = state, color = colorlist[i], marker = markers[i], linewidth = 0.5, markersize = 20)
-#             #cm.lines!(ax1, x, y, color = colorlist[i], linewidth = 0.5)
-#         end
-#         cm.axislegend(ax1)
-
-
-#         x2 = collect(LinRange(x[1], x[end], 101))
-#         y2 = to_fit(x2, fit.param)
-
-#         fitted_shift = round(fit.param[1], sigdigits = 3)
-#         cm.lines!(ax2, x2, y2, color = :forestgreen, alpha = 0.25, linewidth= 8, label = "Fitted Stark Shift: $fitted_shift GHz")
-#         cm.scatterlines!(ax2, x, difs, label = "Difs", marker = '+', markersize = 20, color = :black, linewidth = 0.5)
-#         cm.axislegend(ax2)
-#         cm.display(f)
-
-#         if return_fig_data
-#             top_dat = Dict{Any, Any}("x" => x)
-#             for i in 1:length(dims(tracking_res, :State))
-#                 state = dims(tracking_res, :State)[i]
-#                 top_dat[state] = ys[i]
-#             end
-
-#             bottom_dat = Dict{Any, Any}("x" => x, "y" => difs, "fit_x" => x2, "fit_y" => y2)
-
-#             fig_data = Dict{Any, Any}("top" => top_dat, "bottom" => bottom_dat)
-#             to_return["fig_data"] = fig_data
-#         end
-#     end
-    
-#     return to_return
-    
-# end
+function calibrate_drive_time(drive_param :: GeneralDriveParam, H_op :: qt.QuantumObject, t_range, psi0, to_min::Function; kwargs...)
+    drive_param = deepcopy(drive_param)
+    calibrate_drive_time(drive_param.coef_param, H_op, drive_param.op, t_range, psi0, to_min; kwargs...)
+end

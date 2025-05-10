@@ -27,5 +27,9 @@
     reference_states = Dict{Any, Any}((0,1) => circuit.dressed_states[(0,1)], (2,0) => circuit.dressed_states[(2,0)])
     stark_shifts = LinRange(0.02, 0.05, 11)
 
+    stark_shift_res = SCC.Dynamics.find_stark_shift(H0, drive_op, base_freq, amplitude, stark_shifts, reference_states)
+
+    println("Stark Shift Results: ", stark_shift_res)
+    @test true
 
 end
