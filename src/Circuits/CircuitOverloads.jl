@@ -1,7 +1,9 @@
 function Dynamics.get_drive(circuit :: Circuit, drive_params :: AbstractArray{Dynamics.CircuitDriveParam}; kwargs...)
-    general_drive_params = [Dynamics.GeneralDriveParam(op = circuit.ops[drive_param.op], coef_param = drive_param.coef_param) for drive_param in drive_params]
-    drive = Dynamics.get_drive(general_drive_params; kwargs...)
-    drive.drive_params = drive_params
+    #general_drive_params = [Dynamics.GeneralDriveParam(op = circuit.ops[drive_param.op], coef_param = drive_param.coef_param) for drive_param in drive_params]
+    #drive = Dynamics.get_drive(general_drive_params; kwargs...)
+    drive_coef_params = [drive_params[i].coef_param for i in 1:length(drive_params)]
+    ops = [circuit.ops[drive_params[i].op] for i in 1:length(drive_params)]
+    drive = Dynamics.get_drive(drive_coef_params, ops; drive_params = drive_params, kwargs...)
     return drive
 end
 
@@ -9,7 +11,7 @@ function Dynamics.get_drive(circuit :: Circuit, drive_param :: Dynamics.CircuitD
     if drive_name == ""
         drive_name = "drive_1"
     end
-    Dynamics.get_drive(circuit, [drive_param]; drive_name = [drive_name], kwargs...)
+    Dynamics.get_drive(circuit, [drive_param]; drive_names = [drive_name], kwargs...)
 end
 
 

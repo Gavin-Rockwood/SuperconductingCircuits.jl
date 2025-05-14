@@ -15,14 +15,17 @@ function add_operator!(circuit :: Circuit, operator :: AbstractArray{String}, na
     end
 
     circuit.ops[name] = qt.tensor(ops...)
+    circuit.stuff["ops_def"][name] = operator
     
 end
 
-function get_dressed_states(H0 :: qt.QuantumObject, components :: AbstractArray{Component}, interactions; step_number = 20)
+function get_dressed_states(H0 :: qt.QuantumObject, components :: AbstractArray{Component}, interactions; step_number = 20, f = x -> x^3)
     state_history = []
     energy_history = []
     order_history = []
-    for δ in LinRange(0, 1, step_number)
+    δ0s = LinRange(0, 1, step_number)
+    δs = f.(δ0s)
+    for δ in δs
         H = H0
         for interaction in interactions
             g = interaction[1]
@@ -42,7 +45,7 @@ function get_dressed_states(H0 :: qt.QuantumObject, components :: AbstractArray{
         spectra, states = qt.eigenstates(H)
         push!(state_history, states)
         push!(energy_history, spectra)
-        push!(order_history, collect(0:(length(spectra)-1)))
+        push!(order_history, collect(1:(length(spectra))))
     end
     bare_states = Dict{Any, Any}()
     to_iter = []
@@ -57,17 +60,33 @@ function get_dressed_states(H0 :: qt.QuantumObject, components :: AbstractArray{
         bare_states[state] = qt.tensor(psis...)
     end
 
-    tracking_res = Utils.state_tracker(state_history, dare_states, other_sorts = Dict("energy" => energy_history, "order" => order_history))
+    tracking_res = Utils.state_tracker(state_history, bare_states, other_sorts = Dict("energy" => energy_history, "order" => order_history))
 
     dressed_states = Dict{Any, Any}()
     dressed_energies = Dict{Any, Any}()
-    for i in 1:length(states_iter)
-        dressed_energies[i] = energy_history[1][i]
-        dressed_states[i] = state_history[1][i]
-    end
-    for i in 1:length(states_iter)
-        print("State $i: ")
+    dressed_order = Vector{Tuple}(undef, length(bare_states))
+    for state in keys(bare_states)
+        dressed_energies[state] = tracking_res[State = At(string(state)), Step = At(step_number)]["energy"]
+        dressed_states[state] = tracking_res[State = At(string(state)), Step = At(step_number)]["psi"]
+        dressed_order[tracking_res[State = At(string(state)), Step = At(step_number)]["order"]] = state
     end
 
-    return nothing
+    return [dressed_states, dressed_energies, dressed_order]
+end
+
+function save(circuit :: Circuit, filename :: String)
+    to_save = Dict{String, Any}()
+    to_save["order"] = circuit.order
+    to_save["components"] = Dict{String, Any}()
+    for component in circuit.components
+        to_save["components"][component.params[:name]] = component.params
+    end
+    for i in 1:length(circuit.interactions)
+        to_save["interactions"][i] = circuit.interactions[i]
+    end
+
+    to_save["stuff"] = Dict{String, Any}()
+    for key in keys(circuit.stuff)
+        to_save["stuff"][key] = circuit.stuff[key]
+    end
 end

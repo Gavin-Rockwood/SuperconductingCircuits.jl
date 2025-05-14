@@ -14,7 +14,7 @@ include("Resonator.jl")
 init_components["resonator"] = init_resonator
 include("SNAIL.jl")
 init_components["snail"] = init_snail
-include("Transmons.jl")
+include("Transmon.jl")
 init_components["transmon"] = init_transmon
 include("Qubit.jl")
 init_components["qubit"] = init_qubit

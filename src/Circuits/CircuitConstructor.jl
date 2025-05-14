@@ -10,7 +10,7 @@
     hermitian conjugate added, then there can be an extra entree at the end that is "hc".
 """
 
-function init_circuit(components :: AbstractArray{Component}, interactions; operators_to_add = Dict{String, Any}(), use_sparse = true)
+function init_circuit(components :: AbstractArray{Component}, interactions; operators_to_add = Dict{String, Any}(), use_sparse = true, dressed_kwargs = Dict{Symbol, Any}())
     dims = []
     Is = []
     order = []
@@ -23,6 +23,12 @@ function init_circuit(components :: AbstractArray{Component}, interactions; oper
     end
     dims = tuple(dims...)
 
+    if !(:f in keys(dressed_kwargs))
+        dressed_kwargs[:f] = x -> x^3
+    end
+    if !(:step_number in keys(dressed_kwargs))
+        dressed_kwargs[:step_number] = 10
+    end
     I = qt.eye(prod(dims), dims = dims)
     H_op_0 = 0*I
 
@@ -55,46 +61,47 @@ function init_circuit(components :: AbstractArray{Component}, interactions; oper
     if use_sparse
         H_op = qt.sparse(H_op)
     end
-    # d for dressed, s for states, e for energy
-    de_unsort, ds_unsort = qt.eigenstates(H_op)
-    de_unsort = real.(de_unsort)
-    bare_states = Dict{Any, Any}()
-    to_iter = []
-    for i in 1:length(dims)
-        push!(to_iter, collect(0:(dims[i]-1)))
-    end
-    for state in Iterators.product(to_iter...)
-        psis = []
-        for i in 1:length(components)
-            push!(psis, components[i].eigenstates[state[i]+1])
-        end
-        bare_states[state] = qt.tensor(psis...)
-    end
+    # # d for dressed, s for states, e for energy
+    # de_unsort, ds_unsort = qt.eigenstates(H_op)
+    # de_unsort = real.(de_unsort)
+    # bare_states = Dict{Any, Any}()
+    # to_iter = []
+    # for i in 1:length(dims)
+    #     push!(to_iter, collect(0:(dims[i]-1)))
+    # end
+    # for state in Iterators.product(to_iter...)
+    #     psis = []
+    #     for i in 1:length(components)
+    #         push!(psis, components[i].eigenstates[state[i]+1])
+    #     end
+    #     bare_states[state] = qt.tensor(psis...)
+    # end
 
-    og_order = collect(0:(length(de_unsort)-1))
-    dressed_order = Vector{Union{String, Tuple}}(["missing" for i in 1:length(de_unsort)])
-    tracking_res = Utils.state_tracker([ds_unsort], bare_states, other_sorts = Dict("energy" => [de_unsort], "order" => [og_order]))
+    # og_order = collect(0:(length(de_unsort)-1))
+    # dressed_order = Vector{Union{String, Tuple}}(["missing" for i in 1:length(de_unsort)])
+    # tracking_res = Utils.state_tracker([ds_unsort], bare_states, other_sorts = Dict("energy" => [de_unsort], "order" => [og_order]))
     
-    dressed_states = Dict{Any, Any}()
-    dressed_energies = Dict{Any, Any}()
+    # dressed_states = Dict{Any, Any}()
+    # dressed_energies = Dict{Any, Any}()
 
     
-    states_iter = collect(Iterators.product(to_iter...)) 
-    for i in 1:length(states_iter)
-        dressed_energies[i] = de_unsort[i]
-        dressed_states[i] = ds_unsort[i]
-    end
+    # states_iter = collect(Iterators.product(to_iter...)) 
+    # for i in 1:length(states_iter)
+    #     dressed_energies[i] = de_unsort[i]
+    #     dressed_states[i] = ds_unsort[i]
+    # end
 
-    for i in 1:length(states_iter)
-        state = states_iter[i]
-        # This adds 2 keys for dress_state, one with the bare index, and one with indexing its position in the dressed energy spectrum. 
-        # It is done in a way such that both entries point to the same object to save memory. 
-        og_pos = tracking_res[State = At(string(state)), Step = At(1)]["order"]
-        dressed_states[state] = dressed_states[og_pos+1]
-        dressed_energies[state] = dressed_energies[og_pos+1]
-        dressed_order[og_pos+1] = state
-    end
+    # for i in 1:length(states_iter)
+    #     state = states_iter[i]
+    #     # This adds 2 keys for dress_state, one with the bare index, and one with indexing its position in the dressed energy spectrum. 
+    #     # It is done in a way such that both entries point to the same object to save memory. 
+    #     og_pos = tracking_res[State = At(string(state)), Step = At(1)]["order"]
+    #     dressed_states[state] = dressed_states[og_pos+1]
+    #     dressed_energies[state] = dressed_energies[og_pos+1]
+    #     dressed_order[og_pos+1] = state
+    # end
 
+    dressed_states, dressed_energies, dressed_order = get_dressed_states(H_op, components, interactions; dressed_kwargs...)
 
     loss_ops = Dict{Any, Any}()
     for i in 1:length(components)
@@ -119,7 +126,7 @@ function init_circuit(components :: AbstractArray{Component}, interactions; oper
             loss_ops = loss_ops,
             components = comp_dict,
             interactions = interactions, 
-            stuff = Dict{Any, Any}(),
+            stuff = Dict{String, Any}("ops_def" => Dict{String, Any}()),
             drives = Dict{Any, Any}(),
             gates = Dict{Any, Any}(),
             ops = Dict{Any, Any}(),
