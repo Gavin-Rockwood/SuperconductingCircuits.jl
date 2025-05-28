@@ -3,7 +3,12 @@ function guassian_envelope(t, drive_time; sigma_factor=4, mu = 0)
     if mu == "center"
         mu = drive_time/2
     end
-    return exp(-(t-mu)^2/(2*sigma^2))
+
+    if sigma == 0
+        return 0
+    else
+        return exp(-(t-mu)^2/(2*sigma^2))
+    end
 end
 envelope_dict["guassian"] = guassian_envelope
 

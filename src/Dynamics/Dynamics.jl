@@ -6,6 +6,7 @@ module Dynamics
     using DimensionalData
     import LsqFit as LF
     import CairoMakie as cm
+    import Optim
     include("Utils/Utils.jl")
     include("Floquet/Floquet.jl")
     include("Drives/Drives.jl")

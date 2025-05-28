@@ -25,6 +25,7 @@ function get_dressed_states(H0 :: qt.QuantumObject, components :: AbstractArray{
     order_history = []
     δ0s = LinRange(0, 1, step_number)
     δs = f.(δ0s)
+    println("δs: ", δs)
     for δ in δs
         H = H0
         for interaction in interactions

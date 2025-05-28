@@ -101,7 +101,7 @@ function init_circuit(components :: AbstractArray{Component}, interactions; oper
     #     dressed_order[og_pos+1] = state
     # end
 
-    dressed_states, dressed_energies, dressed_order = get_dressed_states(H_op, components, interactions; dressed_kwargs...)
+    dressed_states, dressed_energies, dressed_order = get_dressed_states(H_op_0, components, interactions; dressed_kwargs...)
 
     loss_ops = Dict{Any, Any}()
     for i in 1:length(components)

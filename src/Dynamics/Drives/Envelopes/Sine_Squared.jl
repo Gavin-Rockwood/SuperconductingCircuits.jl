@@ -1,5 +1,9 @@
 function sine_squared_envelope(t, drive_time; ramp_time = 0, offset = 0, phi = 0)
-    return sin((π/2)*(t-offset)/ramp_time + phi)^2
+    if ramp_time == 0
+        return 0
+    else
+        return sin((π/2)*(t-offset)/ramp_time + phi)^2
+    end
 end
 envelope_dict["sine_squared"] = sine_squared_envelope
 

@@ -29,20 +29,25 @@ function state_tracker(state_history::Vector, states_to_track::Dict; other_sorts
             
             max_loc = argmax(overlaps)
             if max_loc in used_states[:, step]
-                println("------------------------------------------------------------------------")
-                println("State $state at step $step has already been used.")
-                println(reverse(sort(overlaps)[end-5:end]))
+                if use_logging
+                    @info("------------------------------------------------------------------------")
+                    @info("State $state at step $step has already been used.")
+                    @info(reverse(sort(overlaps)[end-5:end]))
+                end
                 prev_locs = findall(x->x == max_loc, used_states[:, step])
-                println("It has been used: $prev_locs")
-                println("The overlaps were: ")
+                
+                if use_logging
+                    @info("It has been used: $prev_locs")
+                    @info("The overlaps were: ")
+                end
                 prev_overlaps = []
                 for loc in prev_locs
                     old_state = state_keys[loc]
                     push!(prev_overlaps, history[State = At(string(old_state)), Step = At(step)]["overlap"])
                 end
-                println(prev_overlaps)
-
-
+                if use_logging
+                    @info(prev_overlaps)
+                end
             end
             psi_i = state_history[step][max_loc]
             history[State = At(string(state)), Step = At(step)]["psi"] = psi_i

@@ -11,6 +11,7 @@ function floquet_sweep(H_func,
 
     F_Modes = []
     F_Energies = []
+    F_bases = []
 
     if (use_logging) @info "Beginning Floquet Sweep" end
     Ts = T
@@ -26,8 +27,10 @@ function floquet_sweep(H_func,
         checking_if_done = findall(x->x == sampling_points[i], sampling_points[1:i-1])
         if length(checking_if_done) >0
             idx = checking_if_done[1]
-            push!(F_Energies, F_Energies[idx])
-            push!(F_Modes, F_Modes[idx])
+            floquet_basis = F_bases[idx]
+            push!(F_Energies, floquet_basis.e_quasi)
+            push!(F_Modes, floquet_basis.modes(sampling_times[i]))
+            push!(F_bases, floquet_basis)
             next!(P)
         else
             if (use_logging) @debug "On Param Set Number $i" end
@@ -39,6 +42,7 @@ function floquet_sweep(H_func,
             qvecs = floquet_basis.modes(sampling_times[i])
             push!(F_Energies, qvals)
             push!(F_Modes, qvecs)
+            push!(F_bases, floquet_basis)
             next!(P)
         end
     end
