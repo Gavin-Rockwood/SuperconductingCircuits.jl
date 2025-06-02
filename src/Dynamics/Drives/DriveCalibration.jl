@@ -118,17 +118,18 @@ function calibrate_drive(drive_op :: qt.QobjEvo, t_range0, psi0, to_min :: Funct
 end
 
 
-function get_FLZ_flattop(H_op, drive_op, freq, epsilon, envelope_func :: Function, ramp_time, psi0, psi1; dt = 0, theta_guess = [0.0, 0.0])
+function get_FLZ_flattop(H_op, drive_op, freq, epsilon, envelope_func :: Function, ramp_time, psi0, psi1; dt = 0, theta_guess = [0.0, 0.0], number_eps_samples = 10)
     if dt == 0
         dt = 1/freq
     end
 
     times_to_sample = sort(unique(vcat(collect(0:dt:ramp_time), ramp_time)))
-    epsilons_to_sample = envelope_func.(times_to_sample)
+    epsilons_to_sample = [[epsilon*envelope_func(t)] for t in times_to_sample]
+
     H_func(param) = H_op+qt.QobjEvo((drive_op, (p,t) -> param[1]*sin(2π*freq*t)))
 
     states_to_track = Dict{Any, Any}("psi0" => psi0, "psi1" => psi1)
-    floq_sweep_res = floquet_sweep(H_func, epsilons_to_sample, 1/freq; states_to_track = states_to_track)
+    floq_sweep_res = floquet_sweep(H_func, epsilons_to_sample, 1/freq; states_to_track = states_to_track, sampling_times = times_to_sample)
     floq_frequency =  floq_sweep_res["Tracking"][State = At("psi0"), Step = At(length(epsilons_to_sample))]["Quasienergies"]/pi-floq_sweep_res["Tracking"][State = At("psi1"), Step = At(length(epsilons_to_sample))]["Quasienergies"]/pi
 
     ψ0_floq = floq_sweep_res["Tracking"][State = At("psi0"), Step = At(length(epsilons_to_sample))]["psi"]
@@ -136,17 +137,18 @@ function get_FLZ_flattop(H_op, drive_op, freq, epsilon, envelope_func :: Functio
 
     H_drive = H_op + qt.QobjEvo((drive_op, (p,t) -> epsilon*envelope_func(t)*sin(2π*freq*t)))
 
-    drive_res_0 = qt.sesolve(H_drive, psi0, times_to_sample; alg = DE.Vern9())
+    drive_res_0 = qt.sesolve(2pi*H_drive, psi0, times_to_sample; alg = DE.Vern9())
     psi0_final = drive_res_0.states[end]
-    to_minimize0(θ) = 1-abs(psi0_final' * (ψ0_floq +ψ1_floq * exp(-1im*θ)))^2/2
-    θ0 = Optim.optimize(to_minimize0, [theta_guess[1]]).minimizer[1]
+    to_minimize0(θ) = 1-abs(psi0_final' * (ψ0_floq + ℯ^(1im*θ[1])*ψ1_floq))^2/2
+    θ = Optim.optimize(to_minimize0, [theta_guess[1]]).minimizer[1]
 
-
-    drive_res_1 = qt.sesolve(H_drive, psi1, times_to_sample; alg = DE.Vern9())
-    psi1_final = drive_res_1.states[end]
-    to_minimize1(θ) = 1-abs(psi1_final' * (ψ0_floq +ψ1_floq * exp(-1im*θ)))^2/2
-    θ1 = Optim.optimize(to_minimize1, [theta_guess[2]]).minimizer[1]
+    # drive_res_1 = qt.sesolve(2pi*H_drive, psi1, times_to_sample; alg = DE.Vern9())
+    # psi1_final = drive_res_1.states[end]
+    # to_minimize1(θ) = 1-abs(psi1_final' * (ψ0_floq - ℯ^(1im*θ[1])*ψ1_floq))^2/2
+    # θ1 = Optim.optimize(to_minimize1, [theta_guess[2]]).minimizer[1]
     
-    θr = mod(π - (abs(abs(θ0) - abs(θ1))), π)
+    θr = mod2pi(π - 2*θ)#(θ0+θ1))
+    println("floq_frequency: $floq_frequency")
+    println("θ: $θ, θr: $θr")
     return abs(θr/(π*floq_frequency))
 end
