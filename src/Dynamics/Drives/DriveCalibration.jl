@@ -10,7 +10,7 @@ function calibrate_drive_time!(drive_coef_param :: StaticDriveCoefParam, H_op ::
             drive = Dynamics.get_drive(drive_param)
 
             dt = abs(1/drive_param.coef_param.frequency)
-            evo_res = qt.sesolve(2*pi*(H_op+drive.drive), psi0, 0:dt:times[j], alg = DE.Vern9(), solver_kwargs...)
+            evo_res = qt.sesolve(2*pi*(H_op+drive.drive), psi0, 0:dt:times[j]; alg = DE.Vern9(), solver_kwargs...)
             push!(sample_mins, to_min(evo_res.states[end]))
         end
         @info "Iter $i mins: $sample_mins"
@@ -84,7 +84,7 @@ function calibrate_drive(drive_op :: qt.QobjEvo, t_range0, psi0, to_min :: Funct
                 push!(sample_mins, previous_mins[loc])
             else
                 drive_time = times[j]
-                evo_res = qt.sesolve(2*pi*drive_op, psi0, 0:dt:times[j], alg = DE.Vern9(), params = [drive_time], solver_kwargs...)
+                evo_res = qt.sesolve(2*pi*drive_op, psi0, 0:dt:times[j]; alg = DE.Vern9(), params = [drive_time], solver_kwargs...)
                 push!(sample_mins, to_min(evo_res.states[end]))
             end
         end

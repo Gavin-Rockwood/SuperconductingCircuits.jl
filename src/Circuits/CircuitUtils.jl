@@ -44,7 +44,7 @@ function get_dressed_states(H0 :: qt.QuantumObject, components :: AbstractArray{
         end
         spectra, states = qt.eigenstates(H)
         push!(state_history, states)
-        push!(energy_history, spectra)
+        push!(energy_history, real.(spectra))
         push!(order_history, collect(1:(length(spectra))))
     end
     bare_states = Dict{Any, Any}()
