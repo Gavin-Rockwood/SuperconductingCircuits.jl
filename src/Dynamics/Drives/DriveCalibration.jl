@@ -118,7 +118,7 @@ function calibrate_drive(drive_op :: qt.QobjEvo, t_range0, psi0, to_min :: Funct
 end
 
 
-function get_FLZ_flattop(H_op, drive_op, freq, epsilon, envelope_func :: Function, ramp_time, psi0, psi1; dt = 0, theta_guess = [0.0, 0.0], number_eps_samples = 10)
+function get_FLZ_flattop(H_op, drive_op, freq, epsilon, envelope_func :: Function, ramp_time, psi0, psi1; dt = 0, n_theta_samples = 1000, number_eps_samples = 10)
     if dt == 0
         dt = 1/freq
     end
@@ -130,7 +130,7 @@ function get_FLZ_flattop(H_op, drive_op, freq, epsilon, envelope_func :: Functio
 
     states_to_track = Dict{Any, Any}("psi0" => psi0, "psi1" => psi1)
     floq_sweep_res = floquet_sweep(H_func, epsilons_to_sample, 1/freq; states_to_track = states_to_track, sampling_times = times_to_sample)
-    floq_frequency =  floq_sweep_res["Tracking"][State = At("psi0"), Step = At(length(epsilons_to_sample))]["Quasienergies"]/pi-floq_sweep_res["Tracking"][State = At("psi1"), Step = At(length(epsilons_to_sample))]["Quasienergies"]/pi
+    floq_frequency =  floq_sweep_res["Tracking"][State = At("psi0"), Step = At(length(epsilons_to_sample))]["Quasienergies"]/(2pi)-floq_sweep_res["Tracking"][State = At("psi1"), Step = At(length(epsilons_to_sample))]["Quasienergies"]/(2pi)
 
     ψ0_floq = floq_sweep_res["Tracking"][State = At("psi0"), Step = At(length(epsilons_to_sample))]["psi"]
     ψ1_floq = floq_sweep_res["Tracking"][State = At("psi1"), Step = At(length(epsilons_to_sample))]["psi"]
@@ -140,7 +140,9 @@ function get_FLZ_flattop(H_op, drive_op, freq, epsilon, envelope_func :: Functio
     drive_res_0 = qt.sesolve(2pi*H_drive, psi0, times_to_sample; alg = DE.Vern9())
     psi0_final = drive_res_0.states[end]
     to_minimize0(θ) = 1-abs(psi0_final' * (ψ0_floq + ℯ^(1im*θ[1])*ψ1_floq))^2/2
-    θ = Optim.optimize(to_minimize0, [theta_guess[1]]).minimizer[1]
+    thetas = [[x] for x in LinRange(0,2π, n_theta_samples)]
+    theta_guess = thetas[argmin(to_minimize.(thetas))[1]]
+    θ = Optim.optimize(to_minimize0, theta_guess).minimizer[1]
 
     # drive_res_1 = qt.sesolve(2pi*H_drive, psi1, times_to_sample; alg = DE.Vern9())
     # psi1_final = drive_res_1.states[end]
@@ -150,5 +152,5 @@ function get_FLZ_flattop(H_op, drive_op, freq, epsilon, envelope_func :: Functio
     θr = mod2pi(π - 2*θ)#(θ0+θ1))
     println("floq_frequency: $floq_frequency")
     println("θ: $θ, θr: $θr")
-    return abs(θr/(π*floq_frequency))
+    return abs(θr/(2π*floq_frequency))
 end
