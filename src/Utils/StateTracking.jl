@@ -1,3 +1,23 @@
+"""
+    state_tracker(state_history::Vector, states_to_track::Dict; other_sorts=Dict{Any, Any}(), use_logging=true)
+
+Tracks the evolution of specified quantum states across a sequence of state histories.
+
+# Arguments
+- `state_history::Vector`: A vector where each element is a collection (e.g., vector or array) of quantum states at a given time step.
+- `states_to_track::Dict`: A dictionary mapping state identifiers to their initial state vectors to be tracked.
+- `other_sorts::Dict{Any, Any}` (optional): A dictionary mapping additional property names to arrays of properties, which are also tracked for each state and time step. Defaults to an empty dictionary.
+- `use_logging::Bool` (optional): If `true`, enables debug and info logging for tracking progress and overlaps. Defaults to `true`.
+
+# Returns
+- `history`: A multidimensional array (AxisArray or similar) indexed by state and step, where each entry is a dictionary containing:
+    - `"psi"`: The tracked state vector at that step.
+    - `"overlap"`: The maximum overlap value found for the state at that step.
+    - Additional keys for each property in `other_sorts`, containing their respective values.
+
+# Description
+For each state specified in `states_to_track`, the function iteratively finds, at each time step, the state in `state_history` with the maximum overlap (squared inner product) with the previous step's tracked state. It records the state vector, overlap, and any additional properties provided in `other_sorts`. The function also ensures that the same state is not assigned to multiple tracked states at the same step, logging a warning if this occurs.
+"""
 function state_tracker(state_history::Vector, states_to_track::Dict; other_sorts = Dict{Any, Any}(), use_logging = true)
     STEPS = length(state_history)
     NUM_IN_STEP = length(state_history[1])

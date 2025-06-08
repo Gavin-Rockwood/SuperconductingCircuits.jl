@@ -9,6 +9,8 @@ abstract type Component end
 # -a dictionary "params" which contains all the parameters that go into the init function where they keys are symbols
 Component_Required_Objects = [:H_op, :params, :eigenstates, :eigenenergies, :dim, :loss_ops]
 
+include("ComponentUtils.jl")
+
 init_components = Dict{Any, Any}() # The keys here need to be same names as the struct names
 include("Resonator.jl")
 init_components["resonator"] = init_resonator

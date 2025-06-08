@@ -1,74 +1,31 @@
-function calibrate_drive_time!(drive_coef_param :: StaticDriveCoefParam, H_op :: qt.QuantumObject, drive_op :: qt.QuantumObject, t_range, psi0, to_min::Function; samples_per_level = 5, maxiter = 5, tol = 1e-3, solver_kwargs = Dict{Symbol, Any}())
-    best_time = 0.0
-    for i in 1:maxiter
-        sample_mins = []
-        times = collect(LinRange(t_range[1], t_range[end], samples_per_level))
-        @info "Times: $times"
-        for j in 1:samples_per_level
-            drive_coef_param.drive_time = times[j]
-            drive_param = GeneralDriveParam(op = drive_op, coef_param = drive_coef_param)
-            drive = Dynamics.get_drive(drive_param)
+"""
+    calibrate_drive(drive_op::qt.QobjEvo, t_range0, psi0, to_min::Function; samples_per_level=5, maxiters=7, tol=1e-3, approx_tol=1e-8, solver_kwargs=Dict{Symbol, Any}(), return_drive=true, include_H=true, dt=1e-2)
 
-            dt = abs(1/drive_param.coef_param.frequency)
-            evo_res = qt.sesolve(2*pi*(H_op+drive.drive), psi0, 0:dt:times[j]; alg = DE.Vern9(), solver_kwargs...)
-            push!(sample_mins, to_min(evo_res.states[end]))
-        end
-        @info "Iter $i mins: $sample_mins"
-        j_best = argmin(sample_mins)
-        if j_best == 1
-            t_range[1] = times[1]
-        elseif j_best > 1
-            t_range[1] = times[j_best-1]
-        end
-        
-        if j_best == samples_per_level
-            t_range[end] = times[samples_per_level]
-        elseif j_best < samples_per_level
-            t_range[end] = times[j_best+1]
-        end
-        best_time = times[j_best]
-        if sample_mins[j_best] < tol
-            @info "Minimum Beats Tolerance: $sample_mins[j_best]"
-            @info "Best Time: $(times[j_best])"
-            @info "Returning This Time"
-            drive_coef_param.drive_time = best_time
-            return nothing
-        end
-    end
-    @info "Never Beat the Tolerance"
-    @info "Returning the Best Time"
-    drive_coef_param.drive_time = best_time
-    return nothing
-end
+Calibrates the duration of a quantum drive by minimizing a user-specified cost function over a given time range.
 
-function calibrate_drive_time!(drive_param :: GeneralDriveParam, H_op :: qt.QuantumObject, t_range, psi0, to_min::Function; kwargs...)
-    calibrate_drive_time!(drive_param.coef_param, H_op, drive_param.op, t_range, psi0, to_min; kwargs...)
-end
+# Arguments
+- `drive_op::qt.QobjEvo`: The time-dependent drive operator (Hamiltonian) to be calibrated.
+- `t_range0`: Initial time range (tuple or array) over which to search for the optimal drive duration.
+- `psi0`: Initial quantum state for the evolution.
+- `to_min::Function`: A function that takes the final state and returns a scalar value to be minimized (e.g., infidelity).
+- `samples_per_level`: Number of time samples to evaluate per iteration (default: 5).
+- `maxiters`: Maximum number of iterations for the calibration loop (default: 7).
+- `tol`: Tolerance for the minimum value of the cost function to consider the calibration successful (default: 1e-3).
+- `approx_tol`: Tolerance for considering two time points as approximately equal (default: 1e-8).
+- `solver_kwargs`: Additional keyword arguments to pass to the ODE solver (default: empty dictionary).
+- `return_drive`: If `true`, returns the calibrated drive (currently unused, default: true).
+- `include_H`: If `true`, includes the Hamiltonian in the evolution (currently unused, default: true).
+- `dt`: Time step for the evolution solver (default: 1e-2).
 
+# Returns
+- A two-element array `[best_time, best_fid]` where:
+    - `best_time`: The optimal drive duration found.
+    - `best_fid`: The minimum value of the cost function achieved.
 
-function calibrate_drive_time(drive_coef_param :: StaticDriveCoefParam, H_op :: qt.QuantumObject, drive_op :: qt.QuantumObject, t_range, psi0, to_min::Function; samples_per_level = 5, maxiter = 5, tol = 1e-3, solver_kwargs = Dict{Symbol, Any}(), return_drive = true, include_H = true)
-    drive_coef_param = deepcopy(drive_coef_param)
-    calibrate_drive_time!(drive_coef_param, H_op, drive_op, t_range, psi0, to_min; samples_per_level = samples_per_level, maxiter = maxiter, tol = tol, solver_kwargs = solver_kwargs)
-    if return_drive
-        drive_param = GeneralDriveParam(op = drive_op, coef_param = drive_coef_param) 
-        if include_H
-            drive = Dynamics.get_drive(drive_param, H_op = H_op)
-        else
-            drive = Dynamics.get_drive(drive_param)
-        end
-        return drive
-    else
-        return drive_coef_param
-    end
-end
-
-function calibrate_drive_time(drive_param :: GeneralDriveParam, H_op :: qt.QuantumObject, t_range, psi0, to_min::Function; kwargs...)
-    drive_param = deepcopy(drive_param)
-    calibrate_drive_time(drive_param.coef_param, H_op, drive_param.op, t_range, psi0, to_min; kwargs...)
-end
-
-
-function calibrate_drive(drive_op :: qt.QobjEvo, t_range0, psi0, to_min :: Function; samples_per_level = 5, maxiters = 7, tol = 1e-3, approx_tol = 1e-8, solver_kwargs = Dict{Symbol, Any}(), return_drive = true, include_H = true, dt = 1e-2)
+# Description
+This function iteratively samples the cost function over a shrinking time interval, searching for the drive duration that minimizes the user-provided `to_min` function. The search continues until the minimum value falls below the specified tolerance or the maximum number of iterations is reached.
+"""
+function calibrate_drive(drive_op :: qt.QobjEvo, t_range0, psi0, to_min :: Function; samples_per_level = 5, maxiters = 7, tol = 1e-3, approx_tol = 1e-8, solver_kwargs = Dict{Symbol, Any}(), include_H = true, dt = 1e-2)
     best_time = 0.0
     t_range = [float(t_range0[1]), float(t_range0[end])]
     previous_times = []
@@ -118,7 +75,34 @@ function calibrate_drive(drive_op :: qt.QobjEvo, t_range0, psi0, to_min :: Funct
 end
 
 
-function get_FLZ_flattop(H_op, drive_op, freq, epsilon, envelope_func :: Function, ramp_time, psi0, psi1; dt = 0, n_theta_samples = 1000, number_eps_samples = 10)
+"""
+    get_FLZ_flattop(H_op, drive_op, freq, epsilon, envelope_func, ramp_time, psi0, psi1; dt=0, n_theta_samples=100, number_eps_samples=10)
+
+Compute the flat-top Floquet-Landau-Zener (FLZ) calibration time for a driven quantum system.
+
+# Arguments
+- `H_op`: The static Hamiltonian operator of the system.
+- `drive_op`: The operator corresponding to the drive term.
+- `freq`: The drive frequency (in Hz).
+- `epsilon`: The drive amplitude.
+- `envelope_func::Function`: A function specifying the envelope of the drive pulse as a function of time.
+- `ramp_time`: The duration of the ramp (in the same units as time).
+- `psi0`: The initial quantum state (typically the ground state).
+- `psi1`: The target quantum state (typically the excited state).
+
+# Keyword Arguments
+- `dt`: Time step for sampling during the ramp. If set to 0 (default), it is set to `1/freq`.
+- `n_theta_samples`: Number of samples for the phase optimization grid search (default: 100).
+- `number_eps_samples`: Number of epsilon samples for the Floquet sweep (default: 10).
+
+# Returns
+- The calibrated flat-top time (in the same units as `ramp_time`) required for the FLZ protocol, based on the phase difference between the Floquet states and the driven evolution.
+
+# Notes
+- This function performs a Floquet sweep to track the evolution of the system under the drive and optimizes the phase to match the final state to the Floquet eigenstates.
+- The function prints the computed Floquet frequency and phase information for diagnostic purposes.
+"""
+function get_FLZ_flattop(H_op, drive_op, freq, epsilon, envelope_func :: Function, ramp_time, psi0, psi1; dt = 0, n_theta_samples = 100, number_eps_samples = 10)
     if dt == 0
         dt = 1/freq
     end

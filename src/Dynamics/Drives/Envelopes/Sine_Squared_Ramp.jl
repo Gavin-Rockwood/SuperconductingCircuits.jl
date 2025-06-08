@@ -1,3 +1,21 @@
+"""
+    sine_squared_ramp_envelope(t, drive_time; ramp_time = 10)
+
+Generates a smooth envelope function with sine-squared ramps at the beginning and end, and a flat top in between.
+
+# Arguments
+- `t`: The current time at which to evaluate the envelope.
+- `drive_time`: The total duration of the envelope, including both ramps and the flat top.
+- `ramp_time`: (optional, default=10) The duration of the rising and falling sine-squared ramps.
+
+# Returns
+- The value of the envelope at time `t`. The envelope smoothly ramps up using a sine-squared function for `ramp_time`, stays at 1.0 for the flat top, and ramps down with a sine-squared function at the end.
+
+# Notes
+- The function assumes the existence of `sine_squared_envelope`, which generates the ramp shape.
+- The `0*t` term ensures compatibility with automatic differentiation tools.
+- If `drive_time < 2*ramp_time`, the flat top duration will be zero or negative, which may not be intended.
+"""
 function sine_squared_ramp_envelope(t, drive_time; ramp_time = 10)
     # sine_squared_envelope does not use the drive_time argument
     flat_top_time = drive_time-2*ramp_time

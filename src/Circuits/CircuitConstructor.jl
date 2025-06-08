@@ -1,15 +1,27 @@
 """
- components: List of components that will be used 
- interactions: list of interactions between the components. 
-    An interaction is a list of the form:
-        [g, op1 symbol, op2 symbol, ....]
-    For example, the transmon-resonator interaction ign̂(â- â') will be written as 
-        [g, ":n_op", "1im*(:a_op - :a_op')"]
-    This then gets passed through a meta.parse function after adding inserting the components before the :. This list must be the 
-    number of components plus 1. If the operator is to be the identity, just write "1". Finally, if the interaction needs to have
-    hermitian conjugate added, then there can be an extra entree at the end that is "hc".
-"""
+    init_circuit(components::AbstractArray{Component}, interactions; operators_to_add=Dict{String, Any}(), use_sparse=true, dressed_kwargs=Dict{Symbol, Any}())
 
+Initialize a quantum circuit from a list of components and their interactions.
+
+# Arguments
+- `components::AbstractArray{Component}`: An array of `Component` objects representing the subsystems of the circuit.
+- `interactions`: A collection describing the interactions between components. Each interaction is typically a tuple or array where the first element is the coupling strength and the remaining elements specify the operators for each component.
+- `operators_to_add=Dict{String, Any}()`: (Optional) A dictionary of additional operators to add to the circuit, keyed by operator name.
+- `use_sparse=true`: (Optional) If `true`, use sparse matrix representations for operators and Hamiltonians.
+- `dressed_kwargs=Dict{Symbol, Any}()`: (Optional) Keyword arguments passed to the dressed state calculation, such as `:f` (function for transformation) and `:step_number` (number of steps).
+
+# Returns
+- `circuit::Circuit`: An initialized `Circuit` object containing the Hamiltonian, dressed states and energies, loss operators, component dictionary, and other relevant circuit information.
+
+# Details
+- Constructs the total Hilbert space dimensions and identity operators for each component.
+- Builds the bare Hamiltonian (`H_op_0`) and adds interaction terms to form the full Hamiltonian (`H_op`).
+- Calculates dressed states and energies using `get_dressed_states`.
+- Assembles loss operators for each component.
+- Organizes components and other circuit data into a `Circuit` struct.
+- Optionally adds user-specified operators to the circuit.
+
+"""
 function init_circuit(components :: AbstractArray{Component}, interactions; operators_to_add = Dict{String, Any}(), use_sparse = true, dressed_kwargs = Dict{Symbol, Any}())
     dims = []
     Is = []
@@ -61,46 +73,7 @@ function init_circuit(components :: AbstractArray{Component}, interactions; oper
     if use_sparse
         H_op = qt.sparse(H_op)
     end
-    # # d for dressed, s for states, e for energy
-    # de_unsort, ds_unsort = qt.eigenstates(H_op)
-    # de_unsort = real.(de_unsort)
-    # bare_states = Dict{Any, Any}()
-    # to_iter = []
-    # for i in 1:length(dims)
-    #     push!(to_iter, collect(0:(dims[i]-1)))
-    # end
-    # for state in Iterators.product(to_iter...)
-    #     psis = []
-    #     for i in 1:length(components)
-    #         push!(psis, components[i].eigenstates[state[i]+1])
-    #     end
-    #     bare_states[state] = qt.tensor(psis...)
-    # end
-
-    # og_order = collect(0:(length(de_unsort)-1))
-    # dressed_order = Vector{Union{String, Tuple}}(["missing" for i in 1:length(de_unsort)])
-    # tracking_res = Utils.state_tracker([ds_unsort], bare_states, other_sorts = Dict("energy" => [de_unsort], "order" => [og_order]))
-    
-    # dressed_states = Dict{Any, Any}()
-    # dressed_energies = Dict{Any, Any}()
-
-    
-    # states_iter = collect(Iterators.product(to_iter...)) 
-    # for i in 1:length(states_iter)
-    #     dressed_energies[i] = de_unsort[i]
-    #     dressed_states[i] = ds_unsort[i]
-    # end
-
-    # for i in 1:length(states_iter)
-    #     state = states_iter[i]
-    #     # This adds 2 keys for dress_state, one with the bare index, and one with indexing its position in the dressed energy spectrum. 
-    #     # It is done in a way such that both entries point to the same object to save memory. 
-    #     og_pos = tracking_res[State = At(string(state)), Step = At(1)]["order"]
-    #     dressed_states[state] = dressed_states[og_pos+1]
-    #     dressed_energies[state] = dressed_energies[og_pos+1]
-    #     dressed_order[og_pos+1] = state
-    # end
-
+  
     dressed_states, dressed_energies, dressed_order = get_dressed_states(H_op_0, components, interactions; dressed_kwargs...)
 
     loss_ops = Dict{Any, Any}()
@@ -141,8 +114,18 @@ function init_circuit(components :: AbstractArray{Component}, interactions; oper
 end
 
 """
-    This one takes in a list of component parameter dictionaries 
-    instead of components. 
+    init_circuit(components::AbstractArray{Dict}, types, interactions; kwargs...)
+
+Initializes a circuit by constructing its components and applying specified interactions.
+
+# Arguments
+- `components::AbstractArray{Dict}`: An array of dictionaries, each containing the parameters for a circuit component.
+- `types`: An array specifying the type of each component, used to select the appropriate constructor from `Component_inits`.
+- `interactions`: Data structure describing the interactions between components.
+- `kwargs...`: Additional keyword arguments passed to the underlying `init_circuit` method.
+
+# Returns
+- The initialized circuit object.
 """
 function init_circuit(components :: AbstractArray{Dict}, types, interactions; kwargs...)
     component_list = []

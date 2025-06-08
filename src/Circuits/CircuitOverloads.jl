@@ -15,22 +15,22 @@ function Dynamics.get_drive(circuit :: Circuit, drive_param :: Dynamics.CircuitD
 end
 
 
-function Dynamics.calibrate_drive_time!(drive_param :: Dynamics.CircuitDriveParam, circuit :: Circuit, t_range, psi0, to_min :: Function; kwargs...)
-    Dynamics.calibrate_drive_time!(drive_param.coef_param, circuit.H_op, circuit.ops[drive_param.op], t_range, psi0, to_min; kwargs...)
-end
+# function Dynamics.calibrate_drive_time!(drive_param :: Dynamics.CircuitDriveParam, circuit :: Circuit, t_range, psi0, to_min :: Function; kwargs...)
+#     Dynamics.calibrate_drive_time!(drive_param.coef_param, circuit.H_op, circuit.ops[drive_param.op], t_range, psi0, to_min; kwargs...)
+# end
 
-function Dynamics.calibrate_drive_time(drive_param :: Dynamics.CircuitDriveParam, circuit :: Circuit, t_range, psi0, to_min :: Function; kwargs...)
-    res = Dynamics.calibrate_drive_time(drive_param.coef_param, circuit.H_op, circuit.ops[drive_param.op], t_range, psi0, to_min; kwargs...)
-    if typeof(res) <: Dynamics.StaticDriveCoefParam
-        res = Dynamics.CircuitDriveParam(open = drive_param.op, coef_param = res)
-    end
-    return res
-end
+# function Dynamics.calibrate_drive_time(drive_param :: Dynamics.CircuitDriveParam, circuit :: Circuit, t_range, psi0, to_min :: Function; kwargs...)
+#     res = Dynamics.calibrate_drive_time(drive_param.coef_param, circuit.H_op, circuit.ops[drive_param.op], t_range, psi0, to_min; kwargs...)
+#     if typeof(res) <: Dynamics.StaticDriveCoefParam
+#         res = Dynamics.CircuitDriveParam(open = drive_param.op, coef_param = res)
+#     end
+#     return res
+# end
 
-function Dynamics.calibrate_drive_time!(drive_coef_param :: Dynamics.StaticDriveCoefParam, circuit :: Circuit, drive_op, args...; kwargs...)
-    Dynamics.calibrate_drive_time!(drive_coef_param, circuit.H_op, circuit.ops[drive_op], args...; kwargs...)
-end
+# function Dynamics.calibrate_drive_time!(drive_coef_param :: Dynamics.StaticDriveCoefParam, circuit :: Circuit, drive_op, args...; kwargs...)
+#     Dynamics.calibrate_drive_time!(drive_coef_param, circuit.H_op, circuit.ops[drive_op], args...; kwargs...)
+# end
 
-function Dynamics.calibrate_drive_time(drive_coef_param :: Dynamics.StaticDriveCoefParam, circuit :: Circuit, drive_op, args...; kwargs...)
-    Dynamics.calibrate_drive_time(drive_coef_param, circuit.H_op, circuit.ops[drive_op], args...; kwargs...)
-end
+# function Dynamics.calibrate_drive_time(drive_coef_param :: Dynamics.StaticDriveCoefParam, circuit :: Circuit, drive_op, args...; kwargs...)
+#     Dynamics.calibrate_drive_time(drive_coef_param, circuit.H_op, circuit.ops[drive_op], args...; kwargs...)
+# end

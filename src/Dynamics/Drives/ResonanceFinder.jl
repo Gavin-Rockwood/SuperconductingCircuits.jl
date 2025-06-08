@@ -1,3 +1,24 @@
+"""
+    find_resonance(H_func, freqs, reference_states::T1; show_plot=false, plot_freq_offset=0, plotxlabel="Drive Frequencies (GHz)") where T1 <: Dict
+
+Finds the resonance frequency and approximate drive time for a driven quantum system using Floquet theory.
+
+# Arguments
+- `H_func`: A function that generates the system Hamiltonian as a function of parameters.
+- `freqs`: An array of drive frequencies (in GHz) to sweep over.
+- `reference_states::T1`: A dictionary mapping state labels to reference states to track during the Floquet sweep.
+- `show_plot`: (optional) If `true`, displays plots of the quasienergies and their differences. Default is `false`.
+- `plot_freq_offset`: (optional) Frequency offset to apply to the x-axis of the plots. Default is `0`.
+- `plotxlabel`: (optional) Label for the x-axis of the plots. Default is `"Drive Frequencies (GHz)"`.
+
+# Returns
+- A two-element array:
+    1. The resonance frequency (in GHz) where the minimum energy gap occurs.
+    2. The approximate drive time associated with the resonance.
+
+# Description
+This function performs a sweep over the provided drive frequencies, computes the Floquet quasienergies for the specified reference states, and determines the resonance by fitting the minimum energy gap to a model function. Optionally, it can display plots of the quasienergies and their differences.
+"""
 function find_resonance(H_func, freqs, reference_states::T1; show_plot = false, plot_freq_offset = 0, plotxlabel = "Drive Frequencies (GHz)") where T1 <: Dict
    sampling_points = []
    state_keys = collect(keys(reference_states))
@@ -59,6 +80,7 @@ function find_resonance(H_func, freqs, reference_states::T1; show_plot = false, 
     return [fit.param[1], 1/(2*fit.param[2]*fit.param[3])]
 
 end
+
 
 function find_resonance(H0, drive_op, freqs, amplitude, reference_states::T1; kwargs...) where T1<:Dict
     H_func(param) = qt.QobjEvo((H0, (drive_op, (p,t) -> amplitude*sin(2*pi*param[:frequency]*t))))

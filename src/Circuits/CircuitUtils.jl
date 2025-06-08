@@ -1,3 +1,20 @@
+"""
+    add_operator!(circuit::Circuit, operator::AbstractArray{String}, name::String; use_sparse=true)
+
+Adds a custom operator to the given `circuit` object.
+
+# Arguments
+- `circuit::Circuit`: The circuit to which the operator will be added.
+- `operator::AbstractArray{String}`: An array of operator strings, one for each component in the circuit. The length must match the number of components in the circuit.
+- `name::String`: The name under which the operator will be stored in the circuit.
+- `use_sparse` (optional, default = `true`): Whether to convert the operator matrices to sparse format.
+
+# Description
+For each component in the circuit, parses and evaluates the corresponding operator string. If the operator is not defined (`nothing`), uses the identity operator for that component. Optionally converts each operator to a sparse matrix. The resulting operators are combined using a tensor product and stored in the circuit's `ops` dictionary under the given `name`. The original operator definitions are also stored in `circuit.stuff["ops_def"]`.
+
+# Throws
+- An error if the length of `operator` does not match the number of components in the circuit.
+"""
 function add_operator!(circuit :: Circuit, operator :: AbstractArray{String}, name :: String; use_sparse = true)
     if length(operator) != length(circuit.components)
         error("The operator must be the same length as the number of components in the circuit.")
@@ -19,6 +36,27 @@ function add_operator!(circuit :: Circuit, operator :: AbstractArray{String}, na
     
 end
 
+"""
+    get_dressed_states(H0::qt.QuantumObject, components::AbstractArray{Component}, interactions; step_number=20, f=x->x^3)
+
+Compute the dressed states, energies, and orderings for a quantum system as interaction strengths are adiabatically turned on.
+
+# Arguments
+- `H0::qt.QuantumObject`: The initial (bare) Hamiltonian of the system.
+- `components::AbstractArray{Component}`: Array of system components, each with a defined Hilbert space dimension and eigenstates.
+- `interactions`: List of interaction specifications. Each interaction is an array where the first element is the coupling strength, and subsequent elements specify operators (or "1" for identity) for each component. The string "hc" can be included to add the Hermitian conjugate.
+- `step_number`: (Optional) Number of steps in the adiabatic interpolation. Default is 20.
+- `f`: (Optional) Function mapping the interpolation parameter (from 0 to 1) to the interaction scaling. Default is `x -> x^3`.
+
+# Returns
+A vector containing:
+1. `dressed_states::Dict`: Mapping from bare state tuples to the corresponding dressed state at the final step.
+2. `dressed_energies::Dict`: Mapping from bare state tuples to the corresponding dressed energy at the final step.
+3. `dressed_order::Vector{Tuple}`: Vector mapping the dressed state order (by energy) to the bare state tuple.
+
+# Description
+The function interpolates between the bare Hamiltonian and the fully interacting Hamiltonian by scaling the interaction terms according to `f`. At each step, it computes the eigenstates and energies, tracks the evolution of each bare state, and returns the dressed states, energies, and their order at the final step.
+"""
 function get_dressed_states(H0 :: qt.QuantumObject, components :: AbstractArray{Component}, interactions; step_number = 20, f = x -> x^3)
     state_history = []
     energy_history = []
@@ -74,6 +112,25 @@ function get_dressed_states(H0 :: qt.QuantumObject, components :: AbstractArray{
     return [dressed_states, dressed_energies, dressed_order]
 end
 
+
+"""
+    save(circuit::Circuit, filename::String)
+
+Serialize and save the given `circuit` object to a file specified by `filename`.
+
+The function collects the following information from the `circuit`:
+- `order`: The order of the circuit.
+- `components`: A dictionary mapping component names to their parameters.
+- `interactions`: A list of circuit interactions.
+- `stuff`: Additional circuit data stored in the `stuff` field.
+
+# Arguments
+- `circuit::Circuit`: The circuit object to be saved.
+- `filename::String`: The path to the file where the circuit data will be saved.
+
+# Note
+The actual file writing operation is not implemented in this function.
+"""
 function save(circuit :: Circuit, filename :: String)
     to_save = Dict{String, Any}()
     to_save["order"] = circuit.order

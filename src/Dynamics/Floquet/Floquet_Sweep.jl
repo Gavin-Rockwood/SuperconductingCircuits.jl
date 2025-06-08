@@ -1,4 +1,28 @@
+"""
+    floquet_sweep(H_func, sampling_points, T; sampling_times=[], use_logging=true, states_to_track=Dict{Any, Any}(), propagator_kwargs=Dict{Any, Any}())
 
+Performs a parameter sweep to compute Floquet modes and quasienergies for a family of time-dependent Hamiltonians.
+
+# Arguments
+- `H_func`: A function that takes a parameter value from `sampling_points` and returns the corresponding Hamiltonian.
+- `sampling_points`: An array of parameter values over which to perform the sweep.
+- `T`: The period of the drive. Can be a scalar (applied to all points) or an array matching `sampling_points`.
+- `sampling_times`: (Optional) Array of times at which to evaluate the Floquet modes for each parameter set. Defaults to zeros.
+- `use_logging`: (Optional) If `true`, logs progress and status messages.
+- `states_to_track`: (Optional) A dictionary of states to track across the sweep. If provided, state tracking is performed.
+- `propagator_kwargs`: (Optional) Dictionary of keyword arguments to pass to the propagator used in Floquet basis calculation.
+
+# Returns
+A dictionary with the following keys:
+- `"F_Modes"`: Array of Floquet modes for each parameter set.
+- `"F_Energies"`: Array of Floquet quasienergies for each parameter set.
+- `"Tracking"`: (Optional) Results from state tracking, if `states_to_track` is provided.
+
+# Notes
+- If a parameter value in `sampling_points` is repeated, previously computed results are reused.
+- Progress is displayed using a progress bar if logging is enabled.
+- Requires `get_floquet_basis` and `Utils.state_tracker` to be defined elsewhere.
+"""
 function floquet_sweep(H_func,
     sampling_points,
     T;

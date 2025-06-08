@@ -1,3 +1,22 @@
+"""
+    Transmon
+
+A struct representing a transmon qubit component in a superconducting circuit.
+
+# Fields
+- `params::Dict`: Dictionary containing the physical parameters of the transmon.
+- `eigenenergies::Vector`: Vector of eigenenergies computed for the transmon Hamiltonian.
+- `eigenstates::Vector`: Vector of eigenstates corresponding to the eigenenergies.
+- `H_op::qt.QuantumObject`: Truncated Hamiltonian operator for the transmon, represented as a quantum object.
+- `dim::Int`: Hilbert space dimension used for truncation.
+- `loss_ops::Dict`: Dictionary of loss (dissipation) operators relevant to the transmon.
+- `H_op_full::qt.QuantumObject`: Full (untruncated) Hamiltonian operator for the transmon.
+- `n_op_full::qt.QuantumObject`: Full (untruncated) charge operator (U(1) number operator).
+- `n_op::qt.QuantumObject`: Truncated charge operator.
+
+# Description
+The `Transmon` struct encapsulates all relevant data and operators for simulating a transmon qubit, including its Hamiltonian, eigenstates, and loss mechanisms. It is designed for use in quantum circuit simulations and analysis.
+"""
 @kwdef struct Transmon <: Component
     params :: Dict
     eigenenergies :: Vector
@@ -13,6 +32,38 @@
 
 end
 
+"""
+    init_transmon(EC, EJ, N_full, N; name = "Transmon", ng = 0, kappa_c = 1/(56*1000), kappa_d = 1.2348024316109425e-5)
+
+Initialize a Transmon qubit Hamiltonian and associated operators.
+
+# Arguments
+- `EC::Real`: Charging energy of the transmon.
+- `EJ::Real`: Josephson energy of the transmon.
+- `N_full::Int`: Number of charge states to include in the full Hilbert space (dimension will be `2*N_full+1`).
+- `N::Int`: Number of energy levels to keep in the truncated Hilbert space.
+- `name::String`: (Optional) Name of the transmon instance. Defaults to `"Transmon"`.
+- `ng::Real`: (Optional) Offset charge. Defaults to `0`.
+- `kappa_c::Real`: (Optional) Collapse (relaxation) rate. Defaults to `1/(56*1000)`.
+- `kappa_d::Real`: (Optional) Dephasing rate. Defaults to `1.2348024316109425e-5`.
+
+# Returns
+- `Transmon`: An instance of the `Transmon` type containing:
+    - `params`: Dictionary of parameters used for initialization.
+    - `dim`: Truncated Hilbert space dimension.
+    - `H_op_full`: Full Hamiltonian operator.
+    - `H_op`: Truncated Hamiltonian operator.
+    - `n_op_full`: Full number operator.
+    - `n_op`: Truncated number operator.
+    - `eigenenergies`: Eigenenergies of the truncated Hamiltonian.
+    - `eigenstates`: Eigenstates of the truncated Hamiltonian.
+    - `loss_ops`: Dictionary of collapse (`"Collapse"`) and dephasing (`"Dephasing"`) operators.
+
+# Notes
+- The function constructs the transmon Hamiltonian in the charge basis, diagonalizes it, and projects onto the lowest `N` energy eigenstates.
+- Collapse and dephasing operators are constructed in the truncated basis.
+- Hermiticity of operators is checked and enforced.
+"""
 function init_transmon(EC, EJ, N_full, N; name = "Transmon",  ng = 0, kappa_c = 1/(56*1000), kappa_d = 1.2348024316109425e-5)
     dim_full = 2*N_full+1
     I_op_full = qt.eye(dim_full)
@@ -76,6 +127,26 @@ function init_transmon(EC, EJ, N_full, N; name = "Transmon",  ng = 0, kappa_c = 
     return Transmon(params = params, dim = N, H_op_full = H_op_full, H_op = H_op, n_op_full = n_op_full, n_op = n_op, eigenenergies = eigenenergies, eigenstates=eigenstates, loss_ops = loss_ops)
 end
 
+
+"""
+    init_transmon(Params::T) where T<:Dict
+
+Initialize a transmon qubit using a dictionary of parameters.
+
+# Arguments
+- `Params::Dict`: A dictionary containing the following required keys:
+    - `:EC`: Charging energy.
+    - `:EJ`: Josephson energy.
+    - `:N_full`: Total number of charge states.
+    - `:N`: Number of charge states to use in the truncated basis.
+  Any additional keyword arguments in the dictionary will be forwarded to the underlying `init_transmon` method.
+
+# Returns
+- An initialized transmon object (type depends on the implementation of `init_transmon`).
+
+# Notes
+- The function extracts required parameters from the dictionary and passes them, along with any remaining parameters, to the lower-level `init_transmon` constructor.
+"""
 function init_transmon(Params::T) where T<:Dict
     params = deepcopy(Params)
     EC = params[:EC]
