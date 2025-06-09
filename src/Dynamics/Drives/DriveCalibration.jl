@@ -76,39 +76,44 @@ end
 
 
 """
-    get_FLZ_flattop(H_op, drive_op, freq, epsilon, envelope_func, ramp_time, psi0, psi1; dt=0, n_theta_samples=100, number_eps_samples=10)
+    get_FLZ_flattop(
+        H_op, drive_op, freq, epsilon, envelope_func, ramp_time, psi0, psi1;
+        dt=0, n_theta_samples=100, number_eps_samples=10
+    )
 
-Compute the flat-top Floquet-Landau-Zener (FLZ) calibration time for a driven quantum system.
+Determine the optimal flat-top duration for a Floquet-Landau-Zener (FLZ) protocol in a driven quantum system.
 
 # Arguments
-- `H_op`: The static Hamiltonian operator of the system.
-- `drive_op`: The operator corresponding to the drive term.
-- `freq`: The drive frequency (in Hz).
-- `epsilon`: The drive amplitude.
-- `envelope_func::Function`: A function specifying the envelope of the drive pulse as a function of time.
-- `ramp_time`: The duration of the ramp (in the same units as time).
-- `psi0`: The initial quantum state (typically the ground state).
-- `psi1`: The target quantum state (typically the excited state).
+- `H_op`: Static system Hamiltonian.
+- `drive_op`: Operator representing the drive interaction.
+- `freq`: Drive frequency (Hz).
+- `epsilon`: Drive amplitude.
+- `envelope_func::Function`: Time-dependent envelope function for the drive pulse.
+- `ramp_time`: Duration of the ramp segment (same time units as used elsewhere).
+- `psi0`: Initial quantum state (e.g., ground state).
+- `psi1`: Target quantum state (e.g., excited state).
 
 # Keyword Arguments
-- `dt`: Time step for sampling during the ramp. If set to 0 (default), it is set to `1/freq`.
-- `n_theta_samples`: Number of samples for the phase optimization grid search (default: 100).
-- `number_eps_samples`: Number of epsilon samples for the Floquet sweep (default: 10).
+- `dt`: Time step for numerical evolution. Defaults to `1/freq` if set to 0.
+- `n_theta_samples`: Number of phase grid points for optimization (default: 100).
+- `num_t_samples`: Number of time samples to evaluate the floquet modes (default: 10).
+- `epsilons_to_sample`: Optional array of epsilon values to sample at each time step. If not provided, it is computed based on the envelope function.
 
 # Returns
-- The calibrated flat-top time (in the same units as `ramp_time`) required for the FLZ protocol, based on the phase difference between the Floquet states and the driven evolution.
+- The calibrated flat-top duration (same units as `ramp_time`) that aligns the system's evolution with the desired Floquet phase, facilitating high-fidelity state transfer.
 
-# Notes
-- This function performs a Floquet sweep to track the evolution of the system under the drive and optimizes the phase to match the final state to the Floquet eigenstates.
-- The function prints the computed Floquet frequency and phase information for diagnostic purposes.
+# Details
+This function simulates the system's evolution under a driven protocol, performing a Floquet analysis to optimize the phase accumulation. It searches for the flat-top time that best matches the target state, using grid search over phase and amplitude parameters. Diagnostic information about the Floquet frequency and phase is printed during execution.
 """
-function get_FLZ_flattop(H_op, drive_op, freq, epsilon, envelope_func :: Function, ramp_time, psi0, psi1; dt = 0, n_theta_samples = 100, number_eps_samples = 10)
+function get_FLZ_flattop(H_op, drive_op, freq, epsilon, envelope_func :: Function, ramp_time, psi0, psi1; num_t_samples = 10, epsilons_to_sample = [], n_theta_samples = 100, dt = 0)
     if dt == 0
         dt = 1/freq
     end
-
-    times_to_sample = sort(unique(vcat(collect(0:dt:ramp_time), ramp_time)))
-    epsilons_to_sample = [[epsilon*envelope_func(t)] for t in times_to_sample]
+    times_to_sample = collect(LinRange(0, ramp_time, num_t_samples))
+    if !(length(epsilons_to_sample) == length(times_to_sample))
+        epsilons_to_sample = [[epsilon*envelope_func(t)] for t in times_to_sample]
+        #println("epsilons_to_sample: $epsilons_to_sample")
+    end
 
     H_func(param) = H_op+qt.QobjEvo((drive_op, (p,t) -> param[1]*sin(2π*freq*t)))
 
@@ -121,12 +126,13 @@ function get_FLZ_flattop(H_op, drive_op, freq, epsilon, envelope_func :: Functio
 
     H_drive = H_op + qt.QobjEvo((drive_op, (p,t) -> epsilon*envelope_func(t)*sin(2π*freq*t)))
 
-    drive_res_0 = qt.sesolve(2pi*H_drive, psi0, times_to_sample; alg = DE.Vern9())
+    drive_res_0 = qt.sesolve(2pi*H_drive, psi0, times_to_sample[1]:dt:times_to_sample[end]; alg = DE.Vern9())
     psi0_final = drive_res_0.states[end]
-    to_minimize0(θ) = 1-abs(psi0_final' * (ψ0_floq + ℯ^(1im*θ[1])*ψ1_floq))^2/2
+    to_minimize(θ) = 1-abs(psi0_final' * (ψ0_floq + ℯ^(1im*θ[1])*ψ1_floq))^2/2
     thetas = [[x] for x in LinRange(0,2π, n_theta_samples)]
     theta_guess = thetas[argmin(to_minimize.(thetas))[1]]
-    θ = Optim.optimize(to_minimize0, theta_guess).minimizer[1]
+    println(theta_guess)
+    θ = Optim.optimize(to_minimize, theta_guess).minimizer[1]
 
     # drive_res_1 = qt.sesolve(2pi*H_drive, psi1, times_to_sample; alg = DE.Vern9())
     # psi1_final = drive_res_1.states[end]
