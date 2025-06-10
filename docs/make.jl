@@ -19,17 +19,24 @@ makedocs(;
     authors = "Gavin Rockwood",
     sitename = "SuperconductingCircuits.jl",
     format = DocumenterVitepress.MarkdownVitepress(
-        repo = "github.com/Gavin-Rockwood/SuperconductingCircuits",
+        repo = "github.com/Gavin-Rockwood/SuperconductingCircuits.jl",
     ),
     pages = PAGES,
     checkdocs = :none
 )
 
+# DocumenterVitepress.deploydocs(;
+#     repo = "github.com/Gavin-Rockwood/SuperconductingCircuits",
+#     target = "build", # this is where Vitepress stores its output
+#     devbranch = "main",
+#     branch = "main",
+#     push_preview = true,
+# )
 DocumenterVitepress.deploydocs(;
-    repo = "github.com/Gavin-Rockwood/SuperconductingCircuits",
-    target = "build", # this is where Vitepress stores its output
+    repo = "github.com/Gavin-Rockwood/SuperconductingCircuits.jl",
+    target = joinpath(@__DIR__, "build"),
     devbranch = "main",
-    branch = "main",
+    branch = "gh-pages",
     push_preview = true,
 )
 
