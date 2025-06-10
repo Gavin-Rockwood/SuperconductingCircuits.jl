@@ -21,10 +21,13 @@ Initialize a quantum circuit from a list of components and their interactions.
 - Organizes components and other circuit data into a `Circuit` struct.
 - Optionally adds user-specified operators to the circuit.
 
+---
+---
 # Overloaded As:
-## init_circuit(components::AbstractArray{Dict}, types, interactions; kwargs...)
+---
+# init_circuit(components::AbstractArray{Dict}, types, interactions; kwargs...)
 Instead of taking in a list of initialized circuit elements, this takes in a list of parameter dictionaries and a list of of the corresponding circuit element types instead.
-### Arguments
+# Arguments
 - `components::AbstractArray{Dict}`: An array of dictionaries, each containing the parameters for a circuit component.
 - `types`: An array specifying the type of each component, used to select the appropriate constructor from `Component_inits`.
 - `interactions`: Data structure describing the interactions between components.
