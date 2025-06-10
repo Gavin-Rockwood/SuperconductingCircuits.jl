@@ -4,7 +4,7 @@ layout: home
 
 hero:
   name: "SuperconductingCircuits.jl"
-  tagline: A pure Julia package for modeling the dynamics of superconducting circuits.
+  tagline: A VERY IN DEVELOPMENT pure Julia package for modeling the dynamics of superconducting circuits.
   actions:
     - theme: brand
       text: Getting Started

@@ -20,8 +20,6 @@ const navTemp = {
 
 const nav = [
   ...navTemp.nav,
-  { text: 'Tutorials', link: 'https://qutip.org/qutip-julia-tutorials/' },
-  { text: 'Benchmarks', link: 'https://qutip.org/QuantumToolbox.jl/benchmarks/' },
   {
     component: 'VersionPicker'
   }
@@ -36,7 +34,7 @@ export default defineConfig({
   cleanUrls: true,
   outDir: 'REPLACE_ME_DOCUMENTER_VITEPRESS', // This is required for MarkdownVitepress to work correctly...
   head: [
-    ['link', { rel: 'icon', href: '/QuantumToolbox.jl/favicon.ico' }],
+    ['link', { rel: 'icon', href: '/SuperconductingCircuits.jl/favicon.ico' }],
     ['script', {src: `${getBaseRepository(baseTemp.base)}versions.js`}],
     // ['script', {src: '/versions.js'], for custom domains, I guess if deploy_url is available.
     ['script', {src: `${baseTemp.base}siteinfo.js`}]
