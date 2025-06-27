@@ -3,11 +3,19 @@ using Documenter
 using DocumenterVitepress
 
 DocMeta.setdocmeta!(SuperconductingCircuits, :DocTestSetup, :(using SuperconductingCircuits); recursive=true)
-
 const PAGES = [
     "Home" => "index.md",
     "Getting Started" => [
         "Overview" => "getting_started/overview.md",
+    ],
+    "User Guide" => [
+        "Circuits" => [
+            "Circuit Elements" => "user_guide/circuits/circuit_elements/circuit_elements.md",
+            "Building Circuits" => "user_guide/circuits/building_circuits/building_circuits.md",
+        ],
+        "Dynamics" => [
+            "Floquet Tools" => "user_guide/dynamics/floquet/floquet.md",
+        ],
     ],
     "Resources" => [
         "API" => "resources/api.md",

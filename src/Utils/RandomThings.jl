@@ -15,7 +15,7 @@ function tostr(obj)
     String(take!(io))
 end
 
-"""
+@doc raw"""
     parse_and_eval(expr::AbstractString, x)
 
 Parses the string `expr` as a Julia expression, defines a function `eval_func(x)` that evaluates this expression with the given argument `x`, and then invokes this function using `invokelatest`.

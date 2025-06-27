@@ -106,11 +106,6 @@ Initialize a resonator using a dictionary of parameters.
 - The result of calling `init_resonator(Eosc, N; params...)` with the extracted and remaining parameters.
 """
 
-function init_resonator(Params::T) where T<:Dict
-    params = deepcopy(Params)
-    Eosc = params[:Eosc]
-    delete!(params, :Eosc)
-    N = params[:N]
-    delete!(params, :N)
-    init_resonator(Eosc, N; params...)
+function init_resonator(; Eosc = 6.228083962082612, N = 10, kwargs...)
+    init_resonator(Eosc, N; kwargs...)
 end

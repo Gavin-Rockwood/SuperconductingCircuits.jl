@@ -33,14 +33,14 @@ The `Transmon` struct encapsulates all relevant data and operators for simulatin
 end
 
 """
-    init_transmon(EC, EJ, N_full, N; name = "Transmon", ng = 0, kappa_c = 1/(56*1000), kappa_d = 1.2348024316109425e-5)
+    init_transmon(EC, EJ, n_full, N; name = "Transmon", ng = 0, kappa_c = 1/(56*1000), kappa_d = 1.2348024316109425e-5)
 
 Initialize a Transmon qubit Hamiltonian and associated operators.
 
 # Arguments
 - `EC::Real`: Charging energy of the transmon.
 - `EJ::Real`: Josephson energy of the transmon.
-- `N_full::Int`: Number of charge states to include in the full Hilbert space (dimension will be `2*N_full+1`).
+- `n_full::Int`: Number of charge states to include in the full Hilbert space (dimension will be `2*n_full+1`).
 - `N::Int`: Number of energy levels to keep in the truncated Hilbert space.
 - `name::String`: (Optional) Name of the transmon instance. Defaults to `"Transmon"`.
 - `ng::Real`: (Optional) Offset charge. Defaults to `0`.
@@ -64,13 +64,13 @@ Initialize a Transmon qubit Hamiltonian and associated operators.
 - Collapse and dephasing operators are constructed in the truncated basis.
 - Hermiticity of operators is checked and enforced.
 """
-function init_transmon(EC, EJ, N_full, N; name = "Transmon",  ng = 0, kappa_c = 1/(56*1000), kappa_d = 1.2348024316109425e-5)
-    dim_full = 2*N_full+1
+function init_transmon(EC, EJ, N; name = "Transmon", n_full = 60,  ng = 0, kappa_c = 1/(56*1000), kappa_d = 1.2348024316109425e-5)
+    dim_full = 2*n_full+1
     I_op_full = qt.eye(dim_full)
     
     jump_op_full = qt.tunneling(dim_full, 1)
 
-    n_op_full = qt.num(dim_full) - N_full
+    n_op_full = qt.num(dim_full) - n_full
 
     H_op_full = 4*EC*(ng*I_op_full - n_op_full)^2 - 0.5*EJ*(jump_op_full)
 
@@ -122,40 +122,11 @@ function init_transmon(EC, EJ, N_full, N; name = "Transmon",  ng = 0, kappa_c = 
     end
     
     loss_ops = Dict("Collapse" => C_op, "Dephasing" => D_op)
-    params = Dict(:EC => EC, :EJ => EJ, :ng => ng, :N_full => N_full, :N => N, :name => name, :kappa_c => kappa_c, :kappa_d => kappa_d)
+    params = Dict(:EC => EC, :EJ => EJ, :ng => ng, :n_full => n_full, :N => N, :name => name, :kappa_c => kappa_c, :kappa_d => kappa_d)
 
     return Transmon(params = params, dim = N, H_op_full = H_op_full, H_op = H_op, n_op_full = n_op_full, n_op = n_op, eigenenergies = eigenenergies, eigenstates=eigenstates, loss_ops = loss_ops)
 end
 
-
-"""
-    init_transmon(Params::T) where T<:Dict
-
-Initialize a transmon qubit using a dictionary of parameters.
-
-# Arguments
-- `Params::Dict`: A dictionary containing the following required keys:
-    - `:EC`: Charging energy.
-    - `:EJ`: Josephson energy.
-    - `:N_full`: Total number of charge states.
-    - `:N`: Number of charge states to use in the truncated basis.
-  Any additional keyword arguments in the dictionary will be forwarded to the underlying `init_transmon` method.
-
-# Returns
-- An initialized transmon object (type depends on the implementation of `init_transmon`).
-
-# Notes
-- The function extracts required parameters from the dictionary and passes them, along with any remaining parameters, to the lower-level `init_transmon` constructor.
-"""
-function init_transmon(Params::T) where T<:Dict
-    params = deepcopy(Params)
-    EC = params[:EC]
-    delete!(params, :EC)
-    EJ = params[:EJ]
-    delete!(params, :EJ)
-    N_full = params[:N_full]
-    delete!(params, :N_full)
-    N = params[:N]
-    delete!(params, :N)
-    init_transmon(EC, EJ, N_full, N; params...)
+function init_transmon(; EC = 0.2, EJ = 1.0, N = 5, kwargs...)
+    init_transmon(EC, EJ, N; kwargs...)
 end

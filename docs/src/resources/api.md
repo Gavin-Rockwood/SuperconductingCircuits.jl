@@ -1,8 +1,12 @@
+```@meta
+CurrentModule = SuperconductingCircuits
+DocTestSetup = quote
+    using SuperconductingCircuits
+end
+```
+
 # SuperconductingCircuits.jl Documentation
 
-:::tabs
-
-== Circuits
 ## Circuits
 ```@autodocs
     Modules = [SuperconductingCircuits.Circuits]
@@ -10,55 +14,51 @@
     Order = [:function, :type]
 ```
 
-## Components
+### Components
 ```@autodocs
     Modules = [SuperconductingCircuits.Circuits]
     Pages = ["Components.jl"]
 ```
 
-### Qubit
+#### Qubit
 ```@autodocs
     Modules = [SuperconductingCircuits.Circuits]
     Pages = ["Qubit.jl"]
 ```
 
-### Resonator
+#### Resonator
 ```@autodocs
     Modules = [SuperconductingCircuits.Circuits]
     Pages = ["Resonator.jl"]
 ```
 
-### SNAIL
+#### SNAIL
 ```@autodocs
     Modules = [SuperconductingCircuits.Circuits]
     Pages = ["SNAIL.jl"]
 ```
 
-### Transmon
+#### Transmon
 ```@autodocs
     Modules = [SuperconductingCircuits.Circuits]
     Pages = ["Transmon.jl"]
 ```
 
-## Utils
+### Circuit Utils
 ```@autodocs
     Modules = [SuperconductingCircuits.Circuits]
     Pages = ["CircuitUtils.jl"]
     Order = [:function, :type]
 ```
 
-== Dynamics
 ## Dynamics
 ```@autodocs
     Modules = [SuperconductingCircuits.Dynamics]
     Order = [:function, :type]
 ```
 
-== Utils
 ## Utils
 ```@autodocs
     Modules = [SuperconductingCircuits.Utils]
     Order = [:function, :type]
 ```
-
-:::
