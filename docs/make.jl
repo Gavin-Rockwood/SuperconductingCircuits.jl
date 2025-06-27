@@ -33,13 +33,6 @@ makedocs(;
     checkdocs = :none
 )
 
-# DocumenterVitepress.deploydocs(;
-#     repo = "github.com/Gavin-Rockwood/SuperconductingCircuits",
-#     target = "build", # this is where Vitepress stores its output
-#     devbranch = "main",
-#     branch = "main",
-#     push_preview = true,
-# )
 DocumenterVitepress.deploydocs(;
     repo = "github.com/Gavin-Rockwood/SuperconductingCircuits.jl",
     target = joinpath(@__DIR__, "build"),
@@ -48,28 +41,3 @@ DocumenterVitepress.deploydocs(;
     push_preview = true,
 )
 
-# using SuperconductingCircuits
-# using Documenter
-
-# DocMeta.setdocmeta!(SuperconductingCircuits, :DocTestSetup, :(using SuperconductingCircuits); recursive=true)
-
-# makedocs(;
-#     modules = [SuperconductingCircuits],
-#     repo = "",#Remotes.GitHub("ExampleOrg", "Example.jl"),
-#     authors = "Gavin Rockwood",
-#     sitename = "SuperconductingCircuits.jl",
-#     format = Documenter.HTML(;
-#         canonical = "https://github.com/ExampleOrg/Example.jl",
-#         edit_link = "main",
-#         assets = String[],
-# ),
-#     pages = [
-#         "Home" => "index.md",
-#     ],
-#     checkdocs = :none,
-# )
-
-# deploydocs(;
-#     repo = "",
-#     devbranch = "main",
-# )

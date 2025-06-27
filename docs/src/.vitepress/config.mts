@@ -97,8 +97,8 @@ export default defineConfig({
       { icon: 'github', link: 'REPLACE_ME_DOCUMENTER_VITEPRESS' }
     ],
     footer: {
-      message: 'Made with <a href="https://documenter.juliadocs.org/stable/" target="_blank"><strong>Documenter.jl</strong></a>, <a href="https://vitepress.dev" target="_blank"><strong>VitePress</strong></a> and <a href="https://luxdl.github.io/DocumenterVitepress.jl/stable" target="_blank"><strong>DocumenterVitepress.jl</strong></a><br>Released under the BSD 3-Clause License. Powered by the <a href="https://www.julialang.org" target="_blank">Julia Programming Language</a>.<br>',
-      copyright: `© Copyright ${new Date().getUTCFullYear()} <a href="https://qutip.org/" target="_blank"><strong>QuTiP.org</strong></a>.`
+      message: 'Made with <a href="https://documenter.juliadocs.org/stable/" target="_blank"><strong>Documenter.jl</strong></a>, <a href="https://vitepress.dev" target="_blank"><strong>VitePress</strong></a> and <a href="https://luxdl.github.io/DocumenterVitepress.jl/stable" target="_blank"><strong>DocumenterVitepress.jl</strong></a><br> Powered by the <a href="https://www.julialang.org" target="_blank">Julia Programming Language</a>.<br>',
+      copyright: `© Copyright ${new Date().getUTCFullYear()}.`
     }
   }
 })
