@@ -1,5 +1,5 @@
 """
-    bump_ramp_envelope(t, drive_time; ramp_time=1, k=2)
+    envelope_bump_ramp(t, drive_time; ramp_time=1, k=2)
 
 Generates a time-dependent envelope function that smoothly transitions between 
 a ramp-up, a constant plateau, and a ramp-down phase.
@@ -23,16 +23,16 @@ a ramp-up, a constant plateau, and a ramp-down phase.
 - The `center` keyword argument in the ramp-down phase adjusts the bump envelope to align with the end of the drive.
 
 """
-function bump_ramp_envelope(t, drive_time; ramp_time = 1, k = 2)
+function envelope_bump_ramp(t, drive_time; ramp_time = 1, k = 2)
     if t<ramp_time
-        return bump_envelope(t, 2*ramp_time; k = k)
+        return envelope_bump(t, 2*ramp_time; k = k)
     elseif (t<=(drive_time-ramp_time)) && (t>=ramp_time)
         return 1
     elseif t>(drive_time-ramp_time)
-        return bump_envelope(t, 2*ramp_time, k = k, mu = drive_time-ramp_time)
+        return envelope_bump(t, 2*ramp_time; k = k, mu = drive_time-ramp_time)
     end
 end
-envelope_dict["bump_ramp"] = bump_ramp_envelope
+envelope_dict["bump_ramp"] = envelope_bump_ramp
 
 # function bump_ramp_envelope_cal(x...)
 #     drive_time = x[1]

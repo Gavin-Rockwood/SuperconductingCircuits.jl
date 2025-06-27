@@ -86,15 +86,3 @@ function find_resonance(H0, drive_op, freqs, amplitude, reference_states::T1; kw
     H_func(param) = qt.QobjEvo((H0, (drive_op, (p,t) -> amplitude*sin(2*pi*param[:frequency]*t))))
     find_resonance(H_func, freqs, reference_states; kwargs...)
 end
-
-function find_stark_shift(H_func, base_freq, starkshifts, reference_states::T1; show_plot = false, kwargs ...) where T1<:Dict
-    freqs = base_freq .+ starkshifts
-    res = find_resonance(H_func, freqs, reference_states; show_plot = show_plot, plot_freq_offset = base_freq, plotxlabel = "Stark Shifts (GHz)", kwargs...)
-    return [res[1].-base_freq, res[2]]
-end
-
-function find_stark_shift(H0, drive_op, base_freq, amplitude, starkshifts, reference_states::T1; kwargs...) where T1<:Dict
-    H_func(param) = qt.QobjEvo((H0, (drive_op, (p,t) -> amplitude*sin(2*pi*param[:frequency]*t))))
-
-    find_stark_shift(H_func, base_freq, starkshifts, reference_states; kwargs...)
-end

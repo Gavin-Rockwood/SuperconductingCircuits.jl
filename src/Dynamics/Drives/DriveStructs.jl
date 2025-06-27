@@ -1,15 +1,6 @@
 abstract type DriveParam end
 abstract type DriveCoefParam end
 
-export DriveParam
-export DriveCoefParam
-export StaticDriveCoefParam
-export DynamicDriveCoefParam
-export GeneralDriveParam
-export CircuitDriveParam
-export Drive
-export Gate
-
 
 # Static drives have constant frequencies, dynamic drives have time dependent frequencies.
     # Need to add the dynamic drives as well as digital drives 

@@ -16,18 +16,18 @@ Generates a smooth envelope function with sine-squared ramps at the beginning an
 - The `0*t` term ensures compatibility with automatic differentiation tools.
 - If `drive_time < 2*ramp_time`, the flat top duration will be zero or negative, which may not be intended.
 """
-function sine_squared_ramp_envelope(t, drive_time; ramp_time = 10)
+function envelope_sine_squared_ramp(t, drive_time; ramp_time = 10)
     # sine_squared_envelope does not use the drive_time argument
     flat_top_time = drive_time-2*ramp_time
     if t<=ramp_time
-        return sine_squared_envelope(t,nothing; ramp_time = ramp_time)
+        return envelope_sine_squared(t,nothing; ramp_time = ramp_time)
     elseif (t>ramp_time) & (t<flat_top_time+ramp_time)
         return 1.0+0*t # the 0*t is for autodif :d
     elseif t>=flat_top_time+ramp_time
-        return sine_squared_envelope(t, nothing; ramp_time = ramp_time, offset = flat_top_time+ramp_time, phi = π/2)
+        return envelope_sine_squared(t, nothing; ramp_time = ramp_time, offset = flat_top_time+ramp_time, phi = π/2)
     end
 end
-envelope_dict["sine_squared_ramp"] = sine_squared_ramp_envelope
+envelope_dict["sine_squared_ramp"] = envelope_sine_squared_ramp
 
 
 # function sine_squared_ramp_envelope_cal(x...)

@@ -14,14 +14,14 @@ Generates a sine-squared envelope function value at time `t`.
 - The value of the sine-squared envelope at time `t`. Returns 0 if `ramp_time == 0`, otherwise returns `sin((π/2)*(t-offset)/ramp_time + phi)^2`.
 
 """
-function sine_squared_envelope(t, drive_time; ramp_time = 0, offset = 0, phi = 0)
+function envelope_sine_squared(t, drive_time; ramp_time = 0, offset = 0, phi = 0)
     if ramp_time == 0
         return 0
     else
         return sin((π/2)*(t-offset)/ramp_time + phi)^2
     end
 end
-envelope_dict["sine_squared"] = sine_squared_envelope
+envelope_dict["sine_squared"] = envelope_sine_squared
 
 # function sine_squared_envelope_cal(x...)
 #     drive_time = x[1]

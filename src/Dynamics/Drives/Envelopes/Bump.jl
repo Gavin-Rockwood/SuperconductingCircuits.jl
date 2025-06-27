@@ -1,5 +1,5 @@
 """
-    bump_envelope(t, drive_time; k = 2, mu = "center")
+    envelope_bump(t, drive_time; k = 2, mu = "center")
 
 Computes a smooth, localized "bump" envelope function at time `t` over a total `drive_time`.
 
@@ -15,7 +15,7 @@ Computes a smooth, localized "bump" envelope function at time `t` over a total `
 # Notes
 The bump envelope is defined such that it is zero outside the interval `[mu - drive_time/2, mu + drive_time/2]`, peaks at `mu`, and smoothly decays to zero at the boundaries. The parameter `k` controls the sharpness of the bump.
 """
-function bump_envelope(t, drive_time; k = 2, mu = "center")
+function envelope_bump(t, drive_time; k = 2, mu = "center")
     if mu == "center"
         mu = drive_time/2
     end
@@ -31,7 +31,7 @@ function bump_envelope(t, drive_time; k = 2, mu = "center")
     end
     
 end
-envelope_dict["bump"] = bump_envelope
+envelope_dict["bump"] = envelope_bump
 
 # function bump_envelope_cal(x...)
 #     drive_time = x[1]

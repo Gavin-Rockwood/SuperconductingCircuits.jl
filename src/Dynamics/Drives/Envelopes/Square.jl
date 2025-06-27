@@ -10,10 +10,10 @@ Returns the value of a square envelope function at time `t` for a given `drive_t
 # Returns
 - `1.0`: The function always returns 1.0, representing a constant (square) envelope.
 """
-function square_envelope(t, drive_time)
+function envelope_square(t, drive_time)
     return 1.0
 end
-envelope_dict["square"] = square_envelope
+envelope_dict["square"] = envelope_square
 
 
 
