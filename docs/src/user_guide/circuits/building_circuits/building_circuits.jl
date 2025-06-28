@@ -2,7 +2,7 @@
 md"""
 # Building a Circuit
 """
-import SuperconductingCircuits as SCC;
+using SuperconductingCircuits;
 using Logging #hide
 disable_logging(Logging.Warn); #hide
 
@@ -20,7 +20,7 @@ transmon_params[:EC] = 0.10283303447280807;
 transmon_params[:N] = 10;
 transmon_params[:n_full] = 60;
 
-transmon = SCC.Circuits.init_components["transmon"](; transmon_params...);
+transmon = init_components["transmon"](; transmon_params...);
 
 md"""
 We now initialize a resonator.
@@ -30,7 +30,7 @@ resonator_params[:name] = "resonator";
 resonator_params[:Eosc] = 6.228083962082612;
 resonator_params[:N] = 10;
 
-resonator = SCC.Circuits.init_components["resonator"](; resonator_params...);
+resonator = init_components["resonator"](; resonator_params...);
 
 md"""
 Here we have initialized two circuit elements: a transmon and a resonator.
@@ -65,7 +65,7 @@ consistency in the circuit definition and makes it easier to save and load circu
 
 ### Putting it all together
 """
-circuit = SCC.Circuits.init_circuit(circuit_elements, interactions; operators_to_add = operators);
+circuit = init_circuit(circuit_elements, interactions; operators_to_add = operators);
 
 md"""
 ## Circuit Properties
