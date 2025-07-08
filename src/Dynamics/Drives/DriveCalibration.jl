@@ -131,7 +131,6 @@ function get_FLZ_flattop(H_op, drive_op, freq, epsilon, envelope_func :: Functio
     to_minimize(θ) = 1-abs(psi0_final' * (ψ0_floq + ℯ^(1im*θ[1])*ψ1_floq))^2/2
     thetas = [[x] for x in LinRange(0,2π, n_theta_samples)]
     theta_guess = thetas[argmin(to_minimize.(thetas))[1]]
-    println(theta_guess)
     θ = Optim.optimize(to_minimize, theta_guess).minimizer[1]
 
     # drive_res_1 = qt.sesolve(2pi*H_drive, psi1, times_to_sample; alg = DE.Vern9())

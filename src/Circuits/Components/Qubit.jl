@@ -19,6 +19,10 @@ A structure representing a quantum bit (qubit) component in a superconducting ci
     eigenstates :: Vector
     eigenenergies :: Vector
 
+    sigmaz_op :: qt.QuantumObject = qt.sigmaz()
+    sigmax_op :: qt.QuantumObject = qt.sigmax()
+    sigmay_op :: qt.QuantumObject = qt.sigmay()
+
     loss_ops :: Dict
 
     freq :: Float64
@@ -68,9 +72,7 @@ Initializes a qubit using a dictionary of parameters.
 
 # Example
 """
-function init_qubit(Params::T) where T<:Dict
-    params = deepcopy(Params)
-    freq = params[:freq]
-    delete!(params, :freq)
-    init_qubit(freq; params...)
+
+function init_qubit(; freq = 1, kwargs...)
+    init_qubit(freq; kwargs...)
 end

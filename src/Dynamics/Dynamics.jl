@@ -12,6 +12,8 @@ module Dynamics
     
     include("Utils/Utils.jl")
     export propagator
+    export get_propagator
+    export Propagator
     
     include("Floquet/Floquet.jl")
     export floquet_basis, floquet_sweep, get_floquet_basis

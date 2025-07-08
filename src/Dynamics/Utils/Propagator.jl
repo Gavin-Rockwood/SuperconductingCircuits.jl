@@ -1,4 +1,6 @@
 import DifferentialEquations as DE
+using Distributed
+using SharedArrays
 
 """
     Propagator
@@ -54,6 +56,45 @@ function propagator(H::Union{qt.QobjEvo, qt.QuantumObject}, tf; ti = 0, solver =
     return qt.Qobj(sol.u[end], dims = H.dims)
 end
 
+function propagator(H::Union{qt.QobjEvo, qt.QuantumObject}, tf, num_new_workers; t0 = 0, existing_workers = [], solver_kwargs = Dict(), solver = DE.Vern9())
+    procs_added = addprocs(num_new_workers)
+    workers_to_use = Vector{Int64}(vcat(existing_workers, procs_added))
+    println("Workers to use: ", workers_to_use)
+    #eval (macroexpand (Main, quote @everywhere using SharedArrays end))
+    import_func(p) = eval(macroexpand(Main, quote @everywhere [myid()] using SharedArrays, QuantumToolbox; import DifferentialEquations as DE end))
+    pmap(import_func, WorkerPool(workers_to_use), workers_to_use)
+    
+    H0 = H
+    if isa(H0, QobjEvo)
+        H0 = H0(0)
+    end
+    energies,states = eigenstates(H0)
+    #println (shared_res)
+    shared_res = SharedArray{eltype(states[1].data)}((size(states)[1], size(states)[1])); pids=vcat(workers_to_use, [1])
+    @everywhere vcat(workers_to_use, [1]) begin
+        states = $states
+        H = $H
+        tf = $tf
+        t0 = $t0
+        solver_kwargs = $solver_kwargs
+        solver = $solver
+    end
+
+    function propagate(i)
+        res = sesolve(H, states[i], [t0, tf]; alg = solver, solver_kwargs...)
+        shared_res[i, :] = res.states[end].data
+    end
+
+    pmap(propagate, WorkerPool(workers_to_use), 1:length(states))
+    states_to_return = [Qobj(shared_res[i, :], dims=states[i].dims) for i in 1:length(states)]
+    rmprocs.(procs_added)
+    
+    return sum(states_to_return[i] * states_to_return[i]' for i in 1:length(states_to_return))
+end
+
+
+
+
 """
     get_propagator(H::Union{qt.QobjEvo, qt.QuantumObject})
 
@@ -68,5 +109,5 @@ The returned `Propagator` provides a function interface to compute the time-evol
 - `Propagator`: An object that can be called to compute the propagator for the specified time interval and solver options.
 """
 function get_propagator(H :: Union{qt.QobjEvo, qt.QuantumObject})
-    return Propagator(H, (tf, ti=0, solver_kwargs=Dict{Symbol, Any}())-> propagator(H, tf; ti=ti, solver_kwargs...))
+    return Propagator(H, (tf, ti=0; kwargs...)-> propagator(H, tf; ti=ti, kwargs...))
 end
