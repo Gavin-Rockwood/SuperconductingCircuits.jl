@@ -61,7 +61,7 @@ function propagator(H::Union{qt.QobjEvo, qt.QuantumObject}, tf, num_new_workers;
     workers_to_use = Vector{Int64}(vcat(existing_workers, procs_added))
     println("Workers to use: ", workers_to_use)
     #eval (macroexpand (Main, quote @everywhere using SharedArrays end))
-    import_func(p) = eval(macroexpand(Main, quote @everywhere [myid()] using SharedArrays, QuantumToolbox; import DifferentialEquations as DE end))
+    import_func(p) = eval(macroexpand(Main, quote @everywhere [myid()] using SharedArrays; import QuantumToolbox as qt; import DifferentialEquations as DE end))
     pmap(import_func, WorkerPool(workers_to_use), workers_to_use)
     
     H0 = H

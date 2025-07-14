@@ -1,3 +1,5 @@
+using Pkg
+Pkg.activate(".")
 import SuperconductingCircuits as SCC
 using Test
 import QuantumToolbox as qt

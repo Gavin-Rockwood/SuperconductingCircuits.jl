@@ -17,10 +17,10 @@ Propagates a set of Floquet modes from the initial time `t₀` to a later time `
 - If `t` is an integer multiple of `T`, the function returns the initial modes unchanged.
 - Otherwise, the function computes the propagator for the time offset `t % T` and applies it to each mode.
 """
-function propagate_floquet_modes(modes_t0, U, t, T; propagator_kwargs=Dict{Symbol, Any}())
+function propagate_floquet_modes(modes_t0, H, t, T; propagator_kwargs=Dict{Symbol, Any}())
     if t%T == 0
         return modes_t0
     end
-    U_t = U.eval(t%T, 0; propagator_kwargs...)
+    U_t = propagator(H, t%T; solver_kwargs = propagator_kwargs)
     return [U_t*modes_t0[i] for i in 1:length(modes_t0)]
 end
