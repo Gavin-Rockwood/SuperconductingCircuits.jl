@@ -27,10 +27,16 @@ Parses the string `expr` as a Julia expression, defines a function `eval_func(x)
 # Returns
 - The result of evaluating the parsed expression with the provided value of `x`.
 """
-function parse_and_eval(expr, x)
+
+function parse_and_eval(expr, a)
+    println("aeuouo")
     exprtoeval =  Meta.parse(expr)
-    @eval eval_func(x) = $exprtoeval
+    @eval  eval_func(x) = $exprtoeval
     invokelatest() do 
-        return eval_func(x)
-    end    
+        return eval_func(a)
+    end
+end
+
+macro Name(arg)
+   string(arg)
 end

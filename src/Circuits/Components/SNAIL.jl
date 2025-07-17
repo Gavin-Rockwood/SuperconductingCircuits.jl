@@ -4,7 +4,7 @@ using LinearAlgebra
 using ..Utils
 #export Transmon, Init_Transmon
 
-@kwdef struct SNAIL <: Component
+@kwdef struct SNAIL <: CircuitComponent
     params :: Dict
     H_op :: qt.QuantumObject
     eigenenergies :: Vector

@@ -14,7 +14,6 @@ function Dynamics.get_drive(circuit :: Circuit, drive_param :: Dynamics.CircuitD
     Dynamics.get_drive(circuit, [drive_param]; drive_names = [drive_name], kwargs...)
 end
 
-
 # function Dynamics.calibrate_drive_time!(drive_param :: Dynamics.CircuitDriveParam, circuit :: Circuit, t_range, psi0, to_min :: Function; kwargs...)
 #     Dynamics.calibrate_drive_time!(drive_param.coef_param, circuit.H_op, circuit.ops[drive_param.op], t_range, psi0, to_min; kwargs...)
 # end

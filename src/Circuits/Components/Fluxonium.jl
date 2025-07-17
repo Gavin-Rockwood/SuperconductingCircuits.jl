@@ -1,5 +1,5 @@
 # DOI: https://doi.org/10.1103/PhysRevB.87.024510
-@kwdef struct Fluxonium <: Component
+@kwdef struct Fluxonium <: CircuitComponent
     params :: Dict
     eigenenergies :: Vector
     eigenstates :: Vector

@@ -9,7 +9,7 @@ If any required attributes are missing, it raises an error listing the missing a
 
 
 """
-function CheckComponentRequirements(component::Component)
+function CheckComponentRequirements(component::CircuitComponent)
     missing_attrs = []
     for attr in Component_Required_Objects
         if !haskey(component, attr)

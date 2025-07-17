@@ -17,7 +17,7 @@ A structure representing a quantum resonator component in a superconducting circ
 # Description
 This structure encapsulates all relevant quantum properties and operators for a resonator component, facilitating simulation and analysis within superconducting circuit models.
 """
-@kwdef struct Resonator <: Component
+@kwdef struct Resonator <: CircuitComponent
     dim :: Int
     params :: Dict
     H_op :: qt.QuantumObject

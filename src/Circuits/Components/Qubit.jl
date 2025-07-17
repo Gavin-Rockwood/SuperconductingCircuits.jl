@@ -12,7 +12,7 @@ A structure representing a quantum bit (qubit) component in a superconducting ci
 - `loss_ops::Dict`: Dictionary of loss (dissipation) operators associated with the qubit.
 - `freq::Float64`: The transition frequency of the qubit.
 """
-@kwdef struct Qubit <: Component
+@kwdef struct Qubit <: CircuitComponent
     dim = 2
     params :: Dict
     H_op :: qt.QuantumObject

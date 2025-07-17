@@ -17,7 +17,7 @@ A struct representing a transmon qubit component in a superconducting circuit.
 # Description
 The `Transmon` struct encapsulates all relevant data and operators for simulating a transmon qubit, including its Hamiltonian, eigenstates, and loss mechanisms. It is designed for use in quantum circuit simulations and analysis.
 """
-@kwdef struct Transmon <: Component
+@kwdef struct Transmon <: CircuitComponent
     params :: Dict
     eigenenergies :: Vector
     eigenstates :: Vector

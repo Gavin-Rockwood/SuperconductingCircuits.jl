@@ -1,5 +1,5 @@
 # Defining Component Abstract Type
-abstract type Component end
+abstract type CircuitComponent end
 # All components will have:
 # - a dimension (dim)
 # - a Hamiltonian (H_op)

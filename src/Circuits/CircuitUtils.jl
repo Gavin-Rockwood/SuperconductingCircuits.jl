@@ -57,7 +57,7 @@ A vector containing:
 # Description
 The function interpolates between the bare Hamiltonian and the fully interacting Hamiltonian by scaling the interaction terms according to `f`. At each step, it computes the eigenstates and energies, tracks the evolution of each bare state, and returns the dressed states, energies, and their order at the final step.
 """
-function get_dressed_states(H0 :: qt.QuantumObject, components :: AbstractArray{Component}, interactions; step_number = 20, f = x -> x^3)
+function get_dressed_states(H0 :: qt.QuantumObject, components :: AbstractArray{CircuitComponent}, interactions; step_number = 20, f = x -> x^3)
     state_history = []
     energy_history = []
     order_history = []

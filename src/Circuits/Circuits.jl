@@ -5,7 +5,7 @@ module Circuits
     using YAXArrays
 
     include("Components/Components.jl")
-    export Component
+    export CircuitComponent
     export init_components
     export Qubit, init_qubit # Qubit.jl
     export Resonator, init_resonator # Resonator.jl
