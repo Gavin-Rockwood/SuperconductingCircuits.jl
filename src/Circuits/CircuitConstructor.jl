@@ -74,7 +74,7 @@ function init_circuit(components :: AbstractArray{CircuitComponent}, interaction
             op = Is[j]
             if interaction[j+1] != "1"    
                 num += 1
-                println(num)
+                #println(num)
                 op = Utils.parse_and_eval(replace(interaction[j+1], ":" => "x.:"), components[j])
             end
             push!(full_op, op)

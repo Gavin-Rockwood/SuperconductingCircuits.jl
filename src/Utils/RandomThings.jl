@@ -29,7 +29,7 @@ Parses the string `expr` as a Julia expression, defines a function `eval_func(x)
 """
 
 function parse_and_eval(expr, a)
-    println("aeuouo")
+    #println("aeuouo")
     exprtoeval =  Meta.parse(expr)
     @eval  eval_func(x) = $exprtoeval
     invokelatest() do 
