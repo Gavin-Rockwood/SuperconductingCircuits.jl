@@ -85,7 +85,7 @@ function get_dressed_states(H0 :: qt.QuantumObject, components :: AbstractArray{
         push!(energy_history, real.(spectra))
         push!(order_history, collect(1:(length(spectra))))
     end
-    bare_states = Dict{Any, Any}()
+    bare_states = []
     to_iter = []
     for i in 1:length(components)
         push!(to_iter, collect(0:(components[i].dim-1)))
@@ -95,7 +95,7 @@ function get_dressed_states(H0 :: qt.QuantumObject, components :: AbstractArray{
         for i in 1:length(components)
             push!(psis, components[i].eigenstates[state[i]+1])
         end
-        bare_states[state] = qt.tensor(psis...)
+        push!(bare_states, qt.tensor(psis...))
     end
 
     tracking_res = Utils.state_tracker(state_history, bare_states, other_sorts = Dict("energy" => energy_history, "order" => order_history))
@@ -103,10 +103,12 @@ function get_dressed_states(H0 :: qt.QuantumObject, components :: AbstractArray{
     dressed_states = Dict{Any, Any}()
     dressed_energies = Dict{Any, Any}()
     dressed_order = Vector{Tuple}(undef, length(bare_states))
-    for state in keys(bare_states)
-        dressed_energies[state] = tracking_res[State = At(string(state)), Step = At(step_number)]["energy"]
-        dressed_states[state] = tracking_res[State = At(string(state)), Step = At(step_number)]["psi"]
-        dressed_order[tracking_res[State = At(string(state)), Step = At(step_number)]["order"]] = state
+    the_iter = collect(Iterators.product(to_iter...))
+    for i in 1:length(the_iter)
+        state = the_iter[i]
+        dressed_energies[state] = tracking_res[i, step_number]["energy"]
+        dressed_states[state] = tracking_res[i, step_number]["psi"]
+        dressed_order[tracking_res[i, step_number]["order"]] = state
     end
 
     return [dressed_states, dressed_energies, dressed_order]

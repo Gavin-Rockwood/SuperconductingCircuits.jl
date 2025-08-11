@@ -28,9 +28,9 @@ function floquet_sweep(H_func,
     T;
     sampling_times = [],
     use_logging=true,
-    states_to_track::T1 =  Dict{Any, Any}(),
+    states_to_track::T1 =  [],
     propagator_kwargs = Dict{Any, Any}()
-    )where T1<:Dict
+    )where T1<:AbstractArray
     STEPS = length(sampling_points)
 
     F_Modes = []

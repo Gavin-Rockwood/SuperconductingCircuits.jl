@@ -19,20 +19,29 @@ Finds the resonance frequency and approximate drive time for a driven quantum sy
 # Description
 This function performs a sweep over the provided drive frequencies, computes the Floquet quasienergies for the specified reference states, and determines the resonance by fitting the minimum energy gap to a model function. Optionally, it can display plots of the quasienergies and their differences.
 """
-function find_resonance(H_func, freqs, reference_states::T1; show_plot = false, plot_freq_offset = 0, plotxlabel = "Drive Frequencies (GHz)", propagator_kwargs = Dict{Any,Any}()) where T1 <: Dict
-   sampling_points = []
-   state_keys = collect(keys(reference_states))
+function find_resonance(H_func, 
+    freqs,
+    reference_states::T1;
+    show_plot = false,
+    plot_freq_offset = 0,
+    plotxlabel = "Drive Frequencies (GHz)",
+    propagator_kwargs = Dict{Any,Any}(),
+    ) where T1 <: Dict
+   
+    sampling_points = []
+    state_keys = collect(keys(reference_states))
+    states_to_track = [reference_states[key] for key in state_keys]
     for freq in freqs
          push!(sampling_points, Dict(:frequency => freq))
     end 
-    
-    floq_sweep = floquet_sweep(H_func, sampling_points, 1.0./freqs; states_to_track = reference_states, propagator_kwargs = propagator_kwargs)
+
+    floq_sweep = floquet_sweep(H_func, sampling_points, 1.0./abs.(freqs); states_to_track = states_to_track, propagator_kwargs = propagator_kwargs)
     
     quasienergies = []
-    for state in state_keys
+    for j in 1:length(state_keys)
         vals_temp = []
         for i in 1:length(freqs)
-            val = floq_sweep["Tracking"][State = At(string(state)), Step = At(i)]["Quasienergies"]/(2*pi)
+            val = floq_sweep["Tracking"][j,i]["Quasienergies"]/(2*pi)
             #if val < 0
             #    val += 2*abs(drive_freqs[i])
             #end
