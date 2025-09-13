@@ -4,6 +4,8 @@ module Circuits
     import ..Dynamics
     using YAXArrays
 
+    import Base.show
+
     include("Components/Components.jl")
     export CircuitComponent
     export init_components

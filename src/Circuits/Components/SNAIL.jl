@@ -168,3 +168,12 @@ function init_snail(Params::T) where T<:Dict
     delete!(params, :N)
     init_snail(EC, EJ, EL, alpha, Phi_e, dim_full, N; params...)
 end
+
+function Base.show(io::IO, component::SNAIL)
+    println(io, "Name: $(component.params[:name])")
+    println(io, "  Parameters:")
+    keys_to_show = [:EC, :EJ, :EL, :alpha, :Phi_e, :dim_full, :N, :N_Junc]
+    for key in keys_to_show
+        println(io, "    $key: $(component.params[key])")
+    end
+end

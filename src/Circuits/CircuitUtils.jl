@@ -57,7 +57,13 @@ A vector containing:
 # Description
 The function interpolates between the bare Hamiltonian and the fully interacting Hamiltonian by scaling the interaction terms according to `f`. At each step, it computes the eigenstates and energies, tracks the evolution of each bare state, and returns the dressed states, energies, and their order at the final step.
 """
-function get_dressed_states(H0 :: qt.QuantumObject, components :: AbstractArray{CircuitComponent}, interactions; step_number = 20, f = x -> x^3)
+function get_dressed_states(H0 :: qt.QuantumObject,
+    components :: AbstractArray{T1},
+    interactions;
+    step_number = 20,
+    f = x -> x^3
+    )where T1 <: CircuitComponent
+    
     state_history = []
     energy_history = []
     order_history = []
@@ -147,5 +153,20 @@ function save(circuit :: Circuit, filename :: String)
     to_save["stuff"] = Dict{String, Any}()
     for key in keys(circuit.stuff)
         to_save["stuff"][key] = circuit.stuff[key]
+    end
+end
+
+function Base.show(io::IO, circuit::Circuit)
+    println(io, "Circuit:\n===============================================\nComponents:")
+    for key in circuit.order
+        println(io, "  $(circuit.components[key])")
+    end
+    println(io, "-----------------------------------------------")
+    println(io, "Interactions:")
+    for interaction in circuit.interactions
+        println(io, "  g: $(interaction[1])")
+        for j in 2:length(interaction)
+            println(io, "    $(j-1): $(interaction[j])")
+        end
     end
 end

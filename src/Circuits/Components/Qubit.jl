@@ -76,3 +76,15 @@ Initializes a qubit using a dictionary of parameters.
 function init_qubit(; freq = 1, kwargs...)
     init_qubit(freq; kwargs...)
 end
+
+function Base.show(io::IO, component::Qubit)
+    println(io, "Name: $(component.params[:name])")
+    println(io, "  Parameters:")
+    keys_to_show = [:freq]
+    for key in keys_to_show
+        println(io, "    $key: $(component.params[key])")
+    end
+        println(io, "  Dimensions:")
+    println(io, "    Hilbert Space: $(component.dim)")
+    println(io, "  Operators: H_op, sigmax_op, sigmay_op, sigmaz_op")
+end

@@ -123,10 +123,22 @@ function init_transmon(EC, EJ, N; name = "Transmon", n_full = 60,  ng = 0, kappa
     
     loss_ops = Dict("Collapse" => C_op, "Dephasing" => D_op)
     params = Dict(:EC => EC, :EJ => EJ, :ng => ng, :n_full => n_full, :N => N, :name => name, :kappa_c => kappa_c, :kappa_d => kappa_d)
-
     return Transmon(params = params, dim = N, H_op_full = H_op_full, H_op = H_op, n_op_full = n_op_full, n_op = n_op, eigenenergies = eigenenergies, eigenstates=eigenstates, loss_ops = loss_ops)
 end
 
 function init_transmon(; EC = 0.2, EJ = 1.0, N = 5, kwargs...)
     init_transmon(EC, EJ, N; kwargs...)
+end
+
+function Base.show(io::IO, component::Transmon)
+    println(io, "Name: $(component.params[:name])")
+    println(io, "  Parameters:")
+    keys_to_show = [:EC, :EJ, :ng, :kappa_c, :kappa_d]
+    for key in keys_to_show
+        println(io, "    $key: $(component.params[key])")
+    end
+    println(io, "  Dimensions:")
+    println(io, "    Hilbert Space: $(component.dim)")
+    println(io, "    Full Hilbert Space: $(2*component.params[:n_full]+1)")
+    println(io, "  Operators: H_op, n_op")
 end

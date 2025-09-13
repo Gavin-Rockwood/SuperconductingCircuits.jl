@@ -26,16 +26,16 @@ function find_resonance(H_func,
     plot_freq_offset = 0,
     plotxlabel = "Drive Frequencies (GHz)",
     propagator_kwargs = Dict{Any,Any}(),
-    ) where T1 <: Dict
+    state_keys = ["state 1", "state 2"]
+    ) where T1 <: AbstractArray
    
     sampling_points = []
-    state_keys = collect(keys(reference_states))
-    states_to_track = [reference_states[key] for key in state_keys]
     for freq in freqs
          push!(sampling_points, Dict(:frequency => freq))
     end 
 
-    floq_sweep = floquet_sweep(H_func, sampling_points, 1.0./abs.(freqs); states_to_track = states_to_track, propagator_kwargs = propagator_kwargs)
+#    return [H_func, sampling_points, 1.0./abs.(freqs), reference_states]
+    floq_sweep = floquet_sweep(H_func, sampling_points, 1.0./abs.(freqs); states_to_track = reference_states, propagator_kwargs = propagator_kwargs)
     
     quasienergies = []
     for j in 1:length(state_keys)
@@ -91,7 +91,7 @@ function find_resonance(H_func,
 end
 
 
-function find_resonance(H0, drive_op, freqs, amplitude, reference_states::T1; kwargs...) where T1<:Dict
-    H_func(param) = qt.QobjEvo((H0, (drive_op, (p,t) -> amplitude*sin(2*pi*param[:frequency]*t))))
+function find_resonance(H0, drive_op, amplitude, freqs, reference_states::T1; kwargs...) where T1<:AbstractArray
+    H_func(param) = H0+qt.QobjEvo((drive_op, (p,t) -> amplitude*sin(2*pi*param[:frequency]*t)))
     find_resonance(H_func, freqs, reference_states; kwargs...)
 end

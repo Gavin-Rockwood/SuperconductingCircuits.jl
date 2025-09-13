@@ -116,3 +116,16 @@ end
 function init_fluxonium(; EJ = 8.9, EC = 2.5, EL = 0.5, N = 10, kwargs...)
     init_fluxonium(EC, EJ, EL, N; kwargs...)
 end
+
+function Base.show(io::IO, component::Fluxonium)
+    println(io, "Name: $(component.params[:name])")
+    println(io, "  Parameters:")
+    keys_to_show = [:EJ, :EC, :EL, :N, :N_full, :flux, :kappa_c, :kappa_d]
+    for key in keys_to_show
+        println(io, "    $key: $(component.params[key])")
+    end
+    println(io, "  Dimensions:")
+    println(io, "    Hilbert Space: $(component.dim)")
+    println(io, "    Full Hilbert Space: $(component.params[:N_full])")
+    println(io, "  Operators: H_op, n_op, phi_op")
+end

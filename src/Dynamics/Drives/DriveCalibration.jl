@@ -115,14 +115,15 @@ function get_FLZ_flattop(H_op, drive_op, freq, epsilon, envelope_func :: Functio
         #println("epsilons_to_sample: $epsilons_to_sample")
     end
 
-    H_func(param) = H_op+qt.QobjEvo((drive_op, (p,t) -> param[1]*sin(2π*freq*t)))
+    function H_func(param)
+        return H_op+qt.QobjEvo((drive_op, (p,t) -> param[1]*sin(2π*freq*t)))
+    end
 
-    states_to_track = Dict{Any, Any}("psi0" => psi0, "psi1" => psi1)
+    states_to_track = [psi0,psi1]#Dict{Any, Any}("psi0" => psi0, "psi1" => psi1)
     floq_sweep_res = floquet_sweep(H_func, epsilons_to_sample, 1/freq; states_to_track = states_to_track, sampling_times = times_to_sample)
-    floq_frequency =  floq_sweep_res["Tracking"][State = At("psi0"), Step = At(length(epsilons_to_sample))]["Quasienergies"]/(2pi)-floq_sweep_res["Tracking"][State = At("psi1"), Step = At(length(epsilons_to_sample))]["Quasienergies"]/(2pi)
-
-    ψ0_floq = floq_sweep_res["Tracking"][State = At("psi0"), Step = At(length(epsilons_to_sample))]["psi"]
-    ψ1_floq = floq_sweep_res["Tracking"][State = At("psi1"), Step = At(length(epsilons_to_sample))]["psi"]
+    floq_frequency =  floq_sweep_res["Tracking"][1,length(epsilons_to_sample)]["Quasienergies"]/(2pi)-floq_sweep_res["Tracking"][2,length(epsilons_to_sample)]["Quasienergies"]/(2pi)
+    ψ0_floq = floq_sweep_res["Tracking"][1,length(epsilons_to_sample)]["psi"]#[State = At("psi0"), Step = At(length(epsilons_to_sample))]["psi"]
+    ψ1_floq = floq_sweep_res["Tracking"][2,length(epsilons_to_sample)]["psi"]#[State = At("psi1"), Step = At(length(epsilons_to_sample))]["psi"]
 
     H_drive = H_op + qt.QobjEvo((drive_op, (p,t) -> epsilon*envelope_func(t)*sin(2π*freq*t)))
 

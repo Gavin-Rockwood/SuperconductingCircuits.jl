@@ -109,3 +109,15 @@ Initialize a resonator using a dictionary of parameters.
 function init_resonator(; Eosc = 6.228083962082612, N = 10, kwargs...)
     init_resonator(Eosc, N; kwargs...)
 end
+
+function Base.show(io::IO, component::Resonator)
+    println(io, "Name: $(component.params[:name])")
+    println(io, "  Parameters:")
+    keys_to_show = [:Eosc, :N, :kappa_c, :kappa_d]
+    for key in keys_to_show
+        println(io, "    $key: $(component.params[key])")
+    end
+    println(io, "  Dimensions:")
+    println(io, "    Hilbert Space: $(component.dim)")
+    println(io, "  Operators: H_op, N_op, a_op")
+end

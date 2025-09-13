@@ -23,16 +23,15 @@ A dictionary with the following keys:
 - Progress is displayed using a progress bar if logging is enabled.
 - Requires `get_floquet_basis` and `Utils.state_tracker` to be defined elsewhere.
 """
-function floquet_sweep(H_func,
-    sampling_points,
-    T;
+function floquet_sweep(H_func::Function,
+    sampling_points::AbstractArray,
+    T::T1;
     sampling_times = [],
     use_logging=true,
-    states_to_track::T1 =  [],
+    states_to_track::T2 =  [],
     propagator_kwargs = Dict{Any, Any}()
-    )where T1<:AbstractArray
+    )where T1<:Union{Real, AbstractArray} where T2<:AbstractArray
     STEPS = length(sampling_points)
-
     F_Modes = []
     F_Energies = []
     F_bases = []

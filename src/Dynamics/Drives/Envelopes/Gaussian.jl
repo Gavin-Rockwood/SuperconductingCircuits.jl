@@ -12,7 +12,7 @@ Computes the value of a Gaussian envelope at time `t` for a given `drive_time`.
 # Returns
 - The value of the Gaussian envelope at time `t`. Returns 0 if `sigma` is 0.
 """
-function envelope_gaussian(t, drive_time; sigma_factor=4, mu = 0)
+function envelope_gaussian(t, drive_time; sigma_factor=4, mu = "center")
     sigma = drive_time/sigma_factor
     if mu == "center"
         mu = drive_time/2

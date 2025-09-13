@@ -34,7 +34,13 @@ Instead of taking in a list of initialized circuit elements, this takes in a lis
 - `kwargs...`: Additional keyword arguments passed to the underlying `init_circuit` method.
 
 """
-function init_circuit(components :: AbstractArray{CircuitComponent}, interactions; operators_to_add = Dict{String, Any}(), use_sparse = true, dressed_kwargs = Dict{Symbol, Any}())
+function init_circuit(components :: AbstractArray{T1}, 
+    interactions; 
+    operators_to_add = Dict{String, Any}(), 
+    use_sparse = true,
+    dressed_kwargs = Dict{Symbol, Any}()
+    ) where T1 <: CircuitComponent
+
     dims = []
     Is = []
     order = []

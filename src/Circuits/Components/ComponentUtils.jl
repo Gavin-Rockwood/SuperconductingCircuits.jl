@@ -20,3 +20,14 @@ function CheckComponentRequirements(component::CircuitComponent)
         error("Component is missing required attributes: $(missing_attrs)")
     end
 end
+
+function Base.show(io::IO, component::CircuitComponent)
+    println(io, "Name: $(component.params[:name])")
+    println(io, "  Parameters:")
+    for (key, value) in component.params
+        if key != :name
+            println(io, "    $key: $value")
+        end
+    end
+end
+
